@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Assign Organizer · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Link Person ↔ Event</h1>
+    <p>Assign organizers, crew, or talent coordinators to events so responsibilities stay transparent.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('event_organizers_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Event</span>
+        <select name="event_id" required>
+          {% for e in events %}
+          <option value="{{ e.event_id }}">{{ e.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Person</span>
+        <select name="person_id" required>
+          {% for p in persons %}
+          <option value="{{ p.person_id }}">{{ p.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Role</span>
+        <input name="person_role" placeholder="Coordinator / Stage manager">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Assign Person</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

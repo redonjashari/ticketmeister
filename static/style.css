@@ -60,7 +60,7 @@ nav a:hover {
 .hero {
     height: 80vh;
     background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(20,20,20,1)),
-                url('img/hero1.jpg');
+                url('/static/img/hero1.jpg');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -478,3 +478,233 @@ nav a:hover {
     }
 }
 
+/* maintenance.css FILE CSS */
+
+:root {
+  --accent: #7f8bff;
+  --accent-strong: #5d44ff;
+  --text-primary: #f5f7ff;
+  --text-muted: #a7b0c8;
+  --card-bg: rgba(18, 18, 22, 0.88);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --glow: rgba(123, 140, 255, 0.24);
+}
+
+.maintenance_body {
+  background-color: #000;
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.divgap {
+  height: 20px;
+}
+
+body > nav {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50px;
+  padding: 0.35rem 0.9rem;
+  backdrop-filter: blur(10px);
+} */
+
+body > nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+body > nav a::before {
+  content: "←";
+  font-size: 1rem;
+  color: var(--accent);
+} */
+
+body > hr {
+  display: none;
+}
+
+.maintenance-page {
+  width: min(960px, 100%);
+  position: relative;
+}
+
+.maintenance-page::before {
+  content: "";
+  position: absolute;
+  inset: -80px;
+  background:
+    radial-gradient(circle at top right, rgba(127, 139, 255, 0.34), transparent 55%),
+    radial-gradient(circle at bottom left, rgba(93, 68, 255, 0.4), transparent 60%);
+  filter: blur(60px);
+  opacity: 0.9;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.glass-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 3.5rem clamp(1.75rem, 3vw, 3rem);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 45px var(--glow);
+  backdrop-filter: blur(18px);
+}
+
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: -150px -60px auto 40%;
+  height: 280px;
+  background: linear-gradient(135deg, rgba(127, 139, 255, 0.6), rgba(93, 68, 255, 0.05));
+  transform: rotate(12deg);
+  opacity: 0.7;
+  pointer-events: none;
+} */
+
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.6rem;
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 3.5vw, 3.5rem);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+} */
+
+.page-heading p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: clamp(1rem, 1.3vw, 1.1rem);
+  max-width: 32rem;
+  line-height: 1.6;
+}
+
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.action-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.6rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(135deg, rgba(28, 28, 32, 0.85), rgba(11, 11, 12, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.action-card::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(127, 139, 255, 0.2), rgba(93, 68, 255, 0));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: -1;
+}
+
+.action-card:hover,
+.action-card:focus-visible {
+  transform: translateY(-6px);
+  border-color: rgba(127, 139, 255, 0.4);
+  box-shadow: 0 18px 40px rgba(127, 139, 255, 0.25);
+}
+
+.action-card:hover::before,
+.action-card:focus-visible::before {
+  opacity: 1;
+}
+
+.action-card span {
+  position: relative;
+  z-index: 1;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.card-description {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card-arrow {
+  margin-top: auto;
+  font-size: 1.4rem;
+  color: var(--accent);
+  transition: transform 0.35s ease;
+}
+
+.action-card:hover .card-arrow,
+.action-card:focus-visible .card-arrow {
+  transform: translateX(6px);
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 6rem 1.25rem 3rem;
+    align-items: flex-start;
+  }
+
+  body > nav {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 1.2rem;
+  }
+
+  .maintenance-page {
+    margin-top: 4.5rem;
+  }
+
+  .glass-panel {
+    padding: 2.6rem 1.75rem;
+  }
+
+  .page-heading {
+    text-align: center;
+    align-items: center;
+  }
+
+  .page-heading p {
+    max-width: none;
+  }
+}

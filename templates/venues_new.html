@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Create Venue · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Create Venue</h1>
+    <p>Set up a new location so upcoming events can be matched with the right capacity and address.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('venues_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Name</span>
+        <input name="v_name" required placeholder="Aurora Concert Hall">
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Address</span>
+        <textarea name="v_address" placeholder="123 River St, Warehouse District"></textarea>
+      </label>
+      <label class="form-field">
+        <span class="form-label">City</span>
+        <input name="city" placeholder="Berlin">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Country</span>
+        <input name="country" placeholder="Germany">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Capacity</span>
+        <input type="number" min="0" name="capacity" placeholder="1200">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Create Venue</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

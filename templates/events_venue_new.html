@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Link Event & Venue · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Link Event ↔ Venue</h1>
+    <p>Match an event with its location so scheduling, logistics, and floor plans remain in sync.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('event_venue_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Event</span>
+        <select name="event_id" required>
+          {% for e in events %}
+          <option value="{{ e.event_id }}">{{ e.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Venue</span>
+        <select name="venue_id" required>
+          {% for v in venues %}
+          <option value="{{ v.venue_id }}">{{ v.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Link Event</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

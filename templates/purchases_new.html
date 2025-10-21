@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Create Purchase · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Create Purchase</h1>
+    <p>Capture an order and track payment status for a guest buying tickets or packages.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('purchases_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Customer</span>
+        <select name="customer_id" required>
+          {% for c in customers %}
+          <option value="{{ c.person_id }}">{{ c.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Purchase time</span>
+        <input type="datetime-local" name="purchase_time">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Total amount (€)</span>
+        <input type="number" step="0.01" min="0" name="total_amount" required placeholder="160.00">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="purch_status">
+          <option>pending</option>
+          <option>completed</option>
+          <option>refunded</option>
+          <option>cancelled</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Save Purchase</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

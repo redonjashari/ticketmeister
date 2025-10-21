@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Record Payment · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Record Payment</h1>
+    <p>Log payment details to reconcile transactions for a specific purchase and keep finances aligned.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('payments_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Purchase</span>
+        <select name="purchase_id" required>
+          {% for p in purchases %}
+          <option value="{{ p.purchase_id }}">{{ p.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Amount (€)</span>
+        <input type="number" step="0.01" min="0" name="amount" required placeholder="120.00">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Method</span>
+        <input name="method" value="card">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Transaction reference</span>
+        <input name="transaction_ref" placeholder="PAY-8K3L2Z">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Paid at</span>
+        <input type="datetime-local" name="paid_at">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="payment_status">
+          <option>ok</option>
+          <option>failed</option>
+          <option>pending</option>
+          <option>refunded</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Save Payment</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

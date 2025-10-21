@@ -1,0 +1,398 @@
+/* CSS for every page inside maintenance.html */
+
+:root {
+  --bg: #10131f;
+  --bg-elevated: rgba(23, 27, 43, 0.95);
+  --surface: rgba(33, 39, 61, 0.68);
+  --card: rgba(19, 23, 37, 0.75);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(118, 137, 255, 0.35);
+  --text-primary: #f3f6ff;
+  --text-muted: #a7afd4;
+  --accent: #6f8bff;
+  --accent-strong: #4f6bff;
+  --danger: #ff6f7d;
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-soft: 0 26px 46px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 16px 38px rgba(32, 40, 74, 0.28);
+  --transition: 0.25s ease;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+.app-body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 10% 20%, rgba(110, 143, 255, 0.15), transparent 55%), radial-gradient(circle at 80% 0%, rgba(146, 119, 255, 0.12), transparent 50%), var(--bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+a {
+  color: inherit;
+}
+
+.app-nav {
+  width: min(1120px, 92%);
+  margin: 2rem auto 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: 1.4rem;
+  z-index: 10;
+}
+
+.app-nav__brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-primary);
+}
+
+.app-nav__brand::before {
+  content: "⌂";
+  font-size: 1.05rem;
+  color: var(--accent);
+}
+
+.app-main {
+  width: min(1120px, 92%);
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 3rem;
+}
+
+.page-shell {
+  width: min(880px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.page-header h1 {
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.form-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.8rem, 2.6vw, 2.6rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.3rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.form-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--text-primary);
+  background: rgba(22, 26, 41, 0.9);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  width: 100%;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  background: rgba(28, 32, 52, 0.95);
+  box-shadow: 0 0 0 3px rgba(111, 139, 255, 0.18);
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08));
+  background-position: calc(100% - 20px) calc(50% - 4px), calc(100% - 16px) calc(50% - 4px), calc(100% - 2.5rem) 50%;
+  background-size: 8px 8px, 8px 8px, 1px 60%;
+  background-repeat: no-repeat;
+  padding-right: 3.25rem;
+}
+
+textarea {
+  min-height: 140px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primary-button {
+  padding: 0.85rem 1.8rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 16px 30px rgba(111, 139, 255, 0.35);
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(111, 139, 255, 0.45);
+  outline: none;
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+.field-span {
+  grid-column: 1 / -1;
+}
+
+.helper-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.feedback-card {
+  position: relative;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-lg) + 6px);
+  padding: clamp(2rem, 3vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.feedback-card::before {
+  content: "";
+  position: absolute;
+  inset: -40% -20% 40% -20%;
+  background: radial-gradient(circle at top, rgba(111, 139, 255, 0.3), transparent 60%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.feedback-card__icon {
+  width: clamp(64px, 10vw, 88px);
+  height: clamp(64px, 10vw, 88px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(111, 139, 255, 0.4);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.feedback-card__title {
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-weight: 700;
+  margin: 0;
+}
+
+.feedback-card__message {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 38ch;
+}
+
+.feedback-card__details {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.feedback-card--success {
+  border-color: rgba(111, 207, 151, 0.45);
+}
+
+.feedback-card--success .feedback-card__icon {
+  background: linear-gradient(135deg, #3ac97c, #2db76a);
+  box-shadow: 0 18px 40px rgba(58, 201, 124, 0.45);
+}
+
+.feedback-card--danger {
+  border-color: rgba(255, 111, 125, 0.45);
+}
+
+.feedback-card--danger .feedback-card__icon {
+  background: linear-gradient(135deg, var(--danger), #ff416b);
+  box-shadow: 0 18px 40px rgba(255, 111, 125, 0.4);
+}
+
+.feedback-card--warning {
+  border-color: rgba(255, 196, 87, 0.45);
+}
+
+.feedback-card--warning .feedback-card__icon {
+  background: linear-gradient(135deg, #ffc247, #ff9d2c);
+  box-shadow: 0 18px 40px rgba(255, 194, 71, 0.4);
+}
+
+.feedback-card--info .feedback-card__icon {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.feedback-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.ghost-button::before {
+  content: "←";
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.ghost-button:hover,
+.ghost-button:focus-visible {
+  border-color: rgba(111, 139, 255, 0.65);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(111, 139, 255, 0.25);
+  outline: none;
+}
+
+@media (max-width: 720px) {
+  .app-nav {
+    margin: 1.4rem auto 0;
+    padding: 0.75rem 1.1rem;
+  }
+
+  .app-main {
+    padding: 1.5rem 0 2.5rem;
+  }
+
+  .page-shell {
+    gap: 1.2rem;
+  }
+
+  .form-card {
+    padding: 1.6rem;
+    gap: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .feedback-card {
+    padding: 2rem 1.6rem;
+  }
+
+  .feedback-card__message {
+    font-size: 1rem;
+  }
+
+  .feedback-actions {
+    width: 100%;
+  }
+
+  .ghost-button {
+    justify-content: center;
+    width: 100%;
+  }
+}

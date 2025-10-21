@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Create Event · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Create Event</h1>
+    <p>Launch a new performance, conference, or showcase with timing and venue details ready to go.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('events_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Title</span>
+        <input name="title" required placeholder="Sunset Sessions">
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Description</span>
+        <textarea name="e_description" placeholder="Add highlights, performers, or session details."></textarea>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Venue</span>
+        <select name="venue_id" required>
+          {% for v in venues %}
+          <option value="{{ v.venue_id }}">{{ v.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Start time</span>
+        <input type="datetime-local" name="start_time" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">End time</span>
+        <input type="datetime-local" name="end_time">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="e_status">
+          <option>scheduled</option>
+          <option>postponed</option>
+          <option>cancelled</option>
+          <option>finished</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Create Event</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

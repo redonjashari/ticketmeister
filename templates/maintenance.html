@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block title %}Maintenance Console · TicketMeister{% endblock %}
+{% block body_class %}maintenance{% endblock %}
+{% block content %}
+<style>
+.app-body.maintenance {
+  --accent: #7f8bff;
+  --accent-strong: #5d44ff;
+  --text-primary: #f5f7ff;
+  --text-muted: #a7b0c8;
+  --card-bg: rgba(18, 18, 22, 0.88);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --glow: rgba(123, 140, 255, 0.24);
+  background: #000;
+  color: var(--text-primary);
+}
+
+.app-body.maintenance .app-nav {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  transform: none;
+  width: auto;
+  margin: 0;
+  padding: 0.45rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+}
+
+.app-body.maintenance .app-nav__brand::before {
+  content: "←";
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.app-body.maintenance .app-main {
+  width: 100%;
+  flex: 1;
+  padding: 6rem 1.5rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.maintenance-page {
+  width: min(960px, 100%);
+  position: relative;
+}
+
+.maintenance-page::before {
+  content: "";
+  position: absolute;
+  inset: -80px;
+  background:
+    radial-gradient(circle at top right, rgba(127, 139, 255, 0.34), transparent 55%),
+    radial-gradient(circle at bottom left, rgba(93, 68, 255, 0.4), transparent 60%);
+  filter: blur(60px);
+  opacity: 0.9;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.glass-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 3.5rem clamp(1.75rem, 3vw, 3rem);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 45px var(--glow);
+  backdrop-filter: blur(18px);
+}
+
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: -150px -60px auto 40%;
+  height: 280px;
+  background: linear-gradient(135deg, rgba(127, 139, 255, 0.6), rgba(93, 68, 255, 0.05));
+  transform: rotate(12deg);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.6rem;
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 3.5vw, 3.5rem);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.page-heading p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: clamp(1rem, 1.3vw, 1.1rem);
+  max-width: 32rem;
+  line-height: 1.6;
+}
+
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.action-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.6rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(135deg, rgba(28, 28, 32, 0.85), rgba(11, 11, 12, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.action-card::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(127, 139, 255, 0.2), rgba(93, 68, 255, 0));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: -1;
+}
+
+.action-card:hover,
+.action-card:focus-visible {
+  transform: translateY(-6px);
+  border-color: rgba(127, 139, 255, 0.4);
+  box-shadow: 0 18px 40px rgba(127, 139, 255, 0.25);
+}
+
+.action-card:hover::before,
+.action-card:focus-visible::before {
+  opacity: 1;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.card-description {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card-arrow {
+  margin-top: auto;
+  font-size: 1.4rem;
+  color: var(--accent);
+  transition: transform 0.35s ease;
+}
+
+.action-card:hover .card-arrow,
+.action-card:focus-visible .card-arrow {
+  transform: translateX(6px);
+}
+
+@media (max-width: 720px) {
+  .app-body.maintenance .app-nav {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 1.2rem;
+  }
+
+  .app-body.maintenance .app-main {
+    padding: 6.5rem 1.1rem 3rem;
+  }
+
+  .maintenance-page {
+    margin-top: 1rem;
+  }
+
+  .glass-panel {
+    padding: 2.6rem 1.75rem;
+  }
+
+  .page-heading {
+    text-align: center;
+    align-items: center;
+  }
+
+  .page-heading p {
+    max-width: none;
+  }
+}
+</style>
+
+<div class="maintenance-page">
+  <div class="glass-panel">
+    <div class="page-heading">
+      <h1>Maintenance Console</h1>
+      <p>Launch new records, connect related data, and keep your ticketing platform humming with the quick actions below.</p>
+    </div>
+    <div class="links-grid">
+      <a class="action-card" href="{{ url_for('persons_new') }}">
+        <span class="card-title">Create Person</span>
+        <span class="card-description">Register a new attendee and capture their preferred contact details.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('venues_new') }}">
+        <span class="card-title">Create Venue</span>
+        <span class="card-description">Add a new venue with capacity and location specifics for upcoming events.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('events_new') }}">
+        <span class="card-title">Create Event</span>
+        <span class="card-description">Spin up a concert, festival, or showcase with scheduling and pricing basics.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('tickets_new') }}">
+        <span class="card-title">Create Ticket</span>
+        <span class="card-description">Define ticket tiers and inventory for the experiences your guests will love.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('purchases_new') }}">
+        <span class="card-title">Create Purchase</span>
+        <span class="card-description">Record a new customer purchase and link it to the right buyer and event.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('payments_new') }}">
+        <span class="card-title">Create Payment</span>
+        <span class="card-description">Capture completed payment details to keep financial records in sync.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('event_organizers_new') }}">
+        <span class="card-title">Link Person ↔ Event</span>
+        <span class="card-description">Assign organizers and staff to events so everyone knows who is in charge.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('purchase_items_new') }}">
+        <span class="card-title">Add Ticket to Purchase</span>
+        <span class="card-description">Attach the right tickets to each purchase and keep allocations tidy.</span>
+        <span class="card-arrow">→</span>
+      </a>
+      <a class="action-card" href="{{ url_for('event_venue_new') }}">
+        <span class="card-title">Link Event ↔ Venue</span>
+        <span class="card-description">Match events with their venues and update layouts as plans evolve.</span>
+        <span class="card-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

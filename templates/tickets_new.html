@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Create Ticket · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Create Ticket</h1>
+    <p>Define inventory and pricing for an event, with optional seat assignments and availability states.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('tickets_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Event</span>
+        <select name="event_id" required>
+          {% for e in events %}
+          <option value="{{ e.event_id }}">{{ e.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Seat (optional)</span>
+        <select name="seat_id">
+          <option value="">-- no seat --</option>
+          {% for s in seats %}
+          <option value="{{ s.seat_id }}">{{ s.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Face value (€)</span>
+        <input type="number" step="0.01" min="0" name="face_value" required placeholder="59.00">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Currency</span>
+        <input name="currency" value="EUR">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="ticket_status">
+          <option>available</option>
+          <option>reserved</option>
+          <option>sold</option>
+          <option>cancelled</option>
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Issued at</span>
+        <input type="datetime-local" name="issued_at">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Create Ticket</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

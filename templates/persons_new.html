@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Create Person · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Create Person</h1>
+    <p>Collect key contact details to onboard a new attendee, crew member, or organizer.</p>
+  </header>
+  <form class="form-card" method="post" action="{{ url_for('persons_create') }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">First name</span>
+        <input name="first_name" required placeholder="Ada">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Last name</span>
+        <input name="last_name" required placeholder="Lovelace">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Email</span>
+        <input type="email" name="email" placeholder="user@domain.com">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Phone</span>
+        <input name="phone" placeholder="+49 123 456789">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Date of birth</span>
+        <input type="date" name="date_of_birth">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit">Create Person</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

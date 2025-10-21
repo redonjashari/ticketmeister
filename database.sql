@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS event_organizers;
 
 
 -- Base entity tables
-CREATE TABLE persons (
+CREATE TABLE IF NOT EXISTS persons (
     person_id       INT AUTO_INCREMENT PRIMARY KEY,
     first_name      VARCHAR(100) NOT NULL,
     last_name       VARCHAR(100) NOT NULL,
@@ -30,13 +30,13 @@ CREATE TABLE persons (
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     person_id       INT PRIMARY KEY,
     loyalty_points  INT DEFAULT 0,
     CONSTRAINT fk_customers_person FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE staff (
+CREATE TABLE IF NOT EXISTS staff (
     person_id       INT PRIMARY KEY,
     employee_number VARCHAR(50) UNIQUE,
     hire_date       DATE,
@@ -44,14 +44,14 @@ CREATE TABLE staff (
     CONSTRAINT fk_staff_person FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE artists (
+CREATE TABLE IF NOT EXISTS artists (
     person_id       INT PRIMARY KEY,
     stage_name      VARCHAR(200),
     bio             TEXT,
     CONSTRAINT fk_artists_person FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE venues (
+CREATE TABLE IF NOT EXISTS venues (
     venue_id        INT AUTO_INCREMENT PRIMARY KEY,
     v_name            VARCHAR(200) NOT NULL,
     v_address         TEXT,
@@ -62,7 +62,7 @@ CREATE TABLE venues (
     CONSTRAINT chk_venue_capacity CHECK (capacity IS NULL OR capacity >= 0)
 ) ENGINE=InnoDB;
 
-CREATE TABLE seats (
+CREATE TABLE IF NOT EXISTS seats (
     seat_id         INT AUTO_INCREMENT PRIMARY KEY,
     venue_id        INT NOT NULL,
     seat_section       VARCHAR(50),
@@ -74,7 +74,7 @@ CREATE TABLE seats (
     CONSTRAINT fk_seats_venue FOREIGN KEY (venue_id) REFERENCES venues(venue_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
     event_id        INT AUTO_INCREMENT PRIMARY KEY,
     title           VARCHAR(255) NOT NULL,
     e_description     TEXT,
@@ -89,7 +89,7 @@ CREATE TABLE events (
 
 
 -- Events ISA
-CREATE TABLE concert_events (
+CREATE TABLE IF NOT EXISTS concert_events (
     event_id        INT NOT NULL,
     genre           VARCHAR(100),
     is_outdoor      TINYINT(1) DEFAULT 0,
@@ -99,7 +99,7 @@ CREATE TABLE concert_events (
     CONSTRAINT fk_concerts_headliner FOREIGN KEY (headliner_id) REFERENCES artists(person_id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
-CREATE TABLE festival (
+CREATE TABLE IF NOT EXISTS festival (
     event_id        INT NOT NULL,
     festival_name      VARCHAR(100),
     PRIMARY KEY (event_id),
@@ -108,7 +108,7 @@ CREATE TABLE festival (
 
 
 -- Tickets for the events
-CREATE TABLE tickets (
+CREATE TABLE IF NOT EXISTS tickets (
     ticket_id       INT AUTO_INCREMENT PRIMARY KEY,
     event_id        INT NOT NULL,
     seat_id         INT NULL,
@@ -126,14 +126,14 @@ CREATE TABLE tickets (
 ) ENGINE=InnoDB;
 
 -- Tickets ISA
-CREATE TABLE regular_tickets (
+CREATE TABLE IF NOT EXISTS regular_tickets (
     ticket_id       INT PRIMARY KEY,
     refundable      TINYINT(1) DEFAULT 0,
     refund_deadline DATETIME,
     CONSTRAINT fk_regular_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE vip_tickets (
+CREATE TABLE IF NOT EXISTS vip_tickets (
     ticket_id       INT PRIMARY KEY,
     perks            TEXT,
     lounge_access    TINYINT(1) DEFAULT 1,
@@ -143,7 +143,7 @@ CREATE TABLE vip_tickets (
 
 
 -- Purchases & payments
-CREATE TABLE purchases (
+CREATE TABLE IF NOT EXISTS purchases (
     purchase_id     INT AUTO_INCREMENT PRIMARY KEY,
     customer_id     INT NOT NULL,
     purchase_time   DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -154,7 +154,7 @@ CREATE TABLE purchases (
     CONSTRAINT chk_total_amount_nonnegative CHECK (total_amount >= 0)
 ) ENGINE=InnoDB;
 
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     payment_id      INT AUTO_INCREMENT PRIMARY KEY,
     purchase_id     INT NOT NULL,
     amount          DECIMAL(12,2) NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE payments (
 
 
 -- Purchase items
-CREATE TABLE purchase_items (
+CREATE TABLE IF NOT EXISTS purchase_items (
     purchase_item_id INT AUTO_INCREMENT PRIMARY KEY,
     purchase_id      INT NOT NULL,
     ticket_id        INT NOT NULL,
@@ -182,7 +182,7 @@ CREATE TABLE purchase_items (
 
 
 -- Performances
-CREATE TABLE performances (
+CREATE TABLE IF NOT EXISTS performances (
     performance_id  INT AUTO_INCREMENT PRIMARY KEY,
     artist_id       INT NOT NULL,
     event_id        INT NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE performances (
 
 
 -- Event organizers
-CREATE TABLE event_organizers (
+CREATE TABLE IF NOT EXISTS event_organizers (
     event_organizer_id INT AUTO_INCREMENT PRIMARY KEY,
     event_id           INT NOT NULL,
     person_id          INT NOT NULL,
