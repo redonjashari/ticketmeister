@@ -22,7 +22,11 @@ def index_page():
 
 @app.route("/home_page")
 def home_page():
-    return redirect(url_for("home"))
+    return render_template("index.html")
+
+@app.route("/imprint")
+def imprint():
+    return render_template("imprint.html")
 
 @app.route("/persons/new")
 def persons_new():
