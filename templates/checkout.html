@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Ticketmeister</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header id="header">
+        <a href="{{ url_for('home') }}" class="logo-link">
+            <div class="logo">Ticketmeister</div>
+        </a>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="checkout-container">
+        <div class="checkout-main">
+            <h1>Complete Your Purchase</h1>
+            
+            <div class="checkout-section">
+                <h2>Event Details</h2>
+                <div class="event-summary">
+                    <h3>{{ event[1] if event else '' }}</h3>
+                    <p>{{ event[2].strftime('%A, %B %d, %Y at %I:%M %p') if event and event[2] else 'Date TBA' }}</p>
+                    <p>{{ event[3] if event else '' }}, {{ event[4] if event else '' }}</p>
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <h2>Selected Tickets</h2>
+                <div class="ticket-list">
+                    {% for ticket in tickets %}
+                    <div class="ticket-item">
+                        <div class="ticket-info">
+                            <span class="ticket-type">{{ ticket[6] }} Ticket</span>
+                            <span class="ticket-details">
+                                {% if ticket[3] %}
+                                    Section {{ ticket[3] }}, Row {{ ticket[4] }}, Seat {{ ticket[5] }}
+                                {% else %}
+                                    General Admission
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="ticket-price">{{ ticket[2] }}{{ "%.2f"|format(ticket[1]) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <h2>Payment Information</h2>
+                <form method="POST" action="{{ url_for('complete_purchase') }}" class="payment-form">
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <div class="payment-methods">
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="card" checked>
+                                <span>💳 Credit/Debit Card</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="paypal">
+                                <span>🅿️ PayPal</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="bank">
+                                <span>🏦 Bank Transfer</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-note">
+                        <p><strong>Note:</strong> This is a demo application. No actual payment will be processed.</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full-width">Complete Purchase</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="checkout-sidebar">
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-line">
+                    <span>Subtotal ({{ tickets|length }} ticket{{ 's' if tickets|length > 1 else '' }})</span>
+                    <span>€{{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-line">
+                    <span>Service Fee</span>
+                    <span>€0.00</span>
+                </div>
+                <div class="summary-line total">
+                    <span>Total</span>
+                    <span>€{{ "%.2f"|format(total) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="imprint_footer">
+        <div class="imprint-content">
+            <h3><a href="{{ url_for('imprint')}}" class="imprint-link">Imprint</a></h3>
+        </div>
+    </footer>
+</body>
+</html>
+

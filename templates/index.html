@@ -3,323 +3,135 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tickermeister</title>
+    <title>Ticketmeister</title>
     <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
     <header id="header">
+        <a href="{{ url_for('home') }}" class="logo-link">
         <div class="logo">Ticketmeister</div>
+        </a>
         <nav>
             <a href="{{ url_for('home') }}">Home</a>
-            <a href="#artists">Artists</a>
-            <a href="#genres">Genres</a>
+            <a href="{{ url_for('genres') }}">Genres</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
             <a href="{{ url_for('maintenance') }}">Maintenance</a>
-            <span class="search-icon">🔍</span>
-            <span class="profile-icon">👤</span>
+                {% endif %}
+                <a href="{{ url_for('profile') }}">Profile</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+            <span class="search-icon" onclick="toggleSearch()">🔍</span>
         </nav>
     </header>
 
+    <!-- Search Bar -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search events, venues, genres..." autocomplete="off">
+            <button onclick="toggleSearch()" class="close-search">×</button>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="hero">
         <div class="hero-content">
-            <h1>The Weeknd: After Hours Tour</h1>
+            {% if featured_event %}
+                <h1>{{ featured_event[1] }}</h1>
             <div class="meta">
-                <span>Dec 15, 2025</span>
-                <span>Madison Square Garden</span>
+                    <span>{{ featured_event[2].strftime('%b %d, %Y') if featured_event[2] else 'TBA' }}</span>
+                    <span>{{ featured_event[4] }}, {{ featured_event[5] }}</span>
             </div>
-            <p>Experience an unforgettable night with The Weeknd as he brings his electrifying After Hours tour to New York City. Don't miss this once-in-a-lifetime performance.</p>
+                <p>{{ featured_event[3] or 'Experience an unforgettable night at this amazing event.' }}</p>
             <div class="hero-buttons">
-                <button class="btn btn-primary" onclick="openModal('The Weeknd: After Hours Tour', 'Dec 15, 2025', 'Madison Square Garden, New York')">▶ Buy Tickets</button>
-                <button class="btn btn-secondary">More Info</button>
+                    <a href="{{ url_for('event_details', event_id=featured_event[0]) }}" class="btn btn-primary">▶ Buy Tickets</a>
+                    <a href="{{ url_for('event_details', event_id=featured_event[0]) }}" class="btn btn-secondary">More Info</a>
             </div>
+            {% else %}
+                <h1>Welcome to Ticketmeister</h1>
+                <p>Your premier destination for concert tickets</p>
+            {% endif %}
         </div>
     </div>
 
     <div class="content">
+        {% if upcoming_events %}
         <div class="section">
             <h2 class="section-title">Upcoming Concerts</h2>
             <div class="carousel-container">
                 <div class="carousel" id="upcoming">
-                    <div class="card" onclick="openModal('Taylor Swift: Eras Tour', 'Nov 2, 2025', 'Soldier Field, Chicago')">
+                    {% for event in upcoming_events[:6] %}
+                    <div class="card" onclick="window.location.href='{{ url_for('event_details', event_id=event[0]) }}'">
                         <div class="card-image">
-                            <img class="img"
-                                src="/static/img/taylor.png" 
-                                alt="taylor">
+                            <img class="img" src="/static/img/hero1.jpg" alt="{{ event[1] }}">
                         </div>
                         <div class="card-info">
-                            <div class="card-title">Taylor Swift: Eras Tour</div>
-                            <div class="card-subtitle">Nov 2, 2025 • Soldier Field</div>
-                            <div class="card-price">From $89</div>
+                            <div class="card-title">{{ event[1] }}</div>
+                            <div class="card-subtitle">
+                                {{ event[2].strftime('%b %d, %Y') if event[2] else 'TBA' }} • {{ event[4] }}
+                        </div>
+                            <div class="card-price">
+                                {% if event[7] %}
+                                    From €{{ "%.0f"|format(event[7]) }}
+                                {% else %}
+                                    Price TBA
+                                {% endif %}
+                    </div>
+                            {% if event[8] == 0 %}
+                                <div class="sold-out-badge">SOLD OUT</div>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="card" onclick="openModal('Drake: For All The Dogs', 'Nov 8, 2025', 'Crypto.com Arena, Los Angeles')">
-                        <div class="card-image">
-                            <img class="card-img"
-                                src="/static/img/drake.jpeg" 
-                                alt="drake">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Drake: For All The Dogs</div>
-                            <div class="card-subtitle">Nov 8, 2025 • Crypto.com Arena</div>
-                            <div class="card-price">From $125</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Beyoncé: Renaissance Tour', 'Nov 15, 2025', 'MetLife Stadium, New Jersey')">
-                        <div class="card-image">
-                            <img class="card-img" 
-                                src="/static/img/beyonce.jpg" 
-                                alt="beyonce">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Beyoncé: Renaissance Tour</div>
-                            <div class="card-subtitle">Nov 15, 2025 • MetLife Stadium</div>
-                            <div class="card-price">From $150</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Bad Bunny: Most Wanted', 'Nov 22, 2025', 'American Airlines Arena, Miami')">
-                        <div class="card-image">
-                            <img class="card-img"
-                                src="/static/img/bad_bunny.jpeg" 
-                                alt="badbunny">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Bad Bunny: Most Wanted</div>
-                            <div class="card-subtitle">Nov 22, 2025 • American Airlines Arena</div>
-                            <div class="card-price">From $95</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Billie Eilish: Hit Me Hard', 'Nov 29, 2025', 'The Forum, Los Angeles')">
-                        <div class="card-image">
-                            <img class="card-img"
-                                src="/static/img/billie.jpg" 
-                                alt="billie">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Billie Eilish: Hit Me Hard</div>
-                            <div class="card-subtitle">Nov 29, 2025 • The Forum</div>
-                            <div class="card-price">From $79</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('50 Cent: The Final Lap Tour', 'Nov 20, 2025', 'Barclays Center, Brooklyn')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/50cent.jpg" 
-                                alt="50Cent">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">50 Cent: The Final Lap Tour</div>
-                            <div class="card-subtitle">Nov 20, 2025 • Barclays Center</div>
-                            <div class="card-price">From $72</div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
         <div class="section">
-            <h2 class="section-title">Top Artists This Month</h2>
-            <div class="carousel-container">
-                <div class="carousel" id="artists">
-                    <div class="card" onclick="openModal('Harry Styles: Love On Tour', 'Dec 5, 2025', 'TD Garden, Boston')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/harry.jpg" 
-                                alt="harry">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Harry Styles: Love On Tour</div>
-                            <div class="card-subtitle">Dec 5, 2025 • TD Garden</div>
-                            <div class="card-price">From $110</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Olivia Rodrigo: GUTS Tour', 'Dec 10, 2025', 'United Center, Chicago')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/olivia.png" 
-                                alt="olivia">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Olivia Rodrigo: GUTS Tour</div>
-                            <div class="card-subtitle">Dec 10, 2025 • United Center</div>
-                            <div class="card-price">From $85</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('SZA: SOS Tour', 'Dec 12, 2025', 'Barclays Center, Brooklyn')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/sza.jpg" 
-                                alt="sza">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">SZA: SOS Tour</div>
-                            <div class="card-subtitle">Dec 12, 2025 • Barclays Center</div>
-                            <div class="card-price">From $99</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Travis Scott: Utopia Tour', 'Dec 18, 2025', 'FTX Arena, Miami')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/travis.png" 
-                                alt="travis">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Travis Scott: Utopia Tour</div>
-                            <div class="card-subtitle">Dec 18, 2025 • FTX Arena</div>
-                            <div class="card-price">From $120</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Dua Lipa: Future Nostalgia', 'Dec 20, 2025', 'The O2, London')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/dua.png" 
-                                alt="dua">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Dua Lipa: Future Nostalgia</div>
-                            <div class="card-subtitle">Dec 20, 2025 • The O2</div>
-                            <div class="card-price">From £75</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Tyler, The Creator: Call Me If You Get Lost Tour', 'Oct 28, 2025', 'Madison Square Garden, New York')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/tyler.jpg" 
-                                alt="tyler">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Tyler, The Creator: Call Me If You</div>
-                            <div class="card-subtitle">Oct 28, 2025 • Madison Square Garden</div>
-                            <div class="card-price">From $79</div>
-                        </div>
-                    </div>
-                </div>
+            <h2 class="section-title">Browse by Genre</h2>
+            <div class="genre-grid">
+                <a href="{{ url_for('genre_events', genre_name='Pop Rock') }}" class="genre-card">
+                    <h3>Pop Rock</h3>
+                </a>
+                <a href="{{ url_for('genre_events', genre_name='R&B/Pop') }}" class="genre-card">
+                    <h3>R&B/Pop</h3>
+                </a>
+                <a href="{{ url_for('genre_events', genre_name='Alternative Rock') }}" class="genre-card">
+                    <h3>Alternative Rock</h3>
+                </a>
+                <a href="{{ url_for('genre_events', genre_name='Indie') }}" class="genre-card">
+                    <h3>Indie</h3>
+                </a>
+                <a href="{{ url_for('genre_events', genre_name='Acoustic/Pop') }}" class="genre-card">
+                    <h3>Acoustic/Pop</h3>
+                </a>
+                <a href="{{ url_for('genre_events', genre_name='Mixed') }}" class="genre-card">
+                    <h3>Mixed</h3>
+                </a>
             </div>
         </div>
-
+        {% else %}
         <div class="section">
-            <h2 class="section-title">Recommended For You</h2>
-            <div class="carousel-container">
-                <div class="carousel" id="recommended">
-                    <div class="card" onclick="openModal('Coldplay: Music of the Spheres', 'Jan 5, 2026', 'Wembley Stadium, London')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/cold.jpg" 
-                                alt="coldplay">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Coldplay: Music of the Spheres</div>
-                            <div class="card-subtitle">Jan 5, 2026 • Wembley Stadium</div>
-                            <div class="card-price">From £95</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Ed Sheeran: Mathematics Tour', 'Jan 12, 2026', 'Rogers Centre, Toronto')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/ed.jpg" 
-                                alt="ed">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Ed Sheeran: Mathematics Tour</div>
-                            <div class="card-subtitle">Jan 12, 2026 • Rogers Centre</div>
-                            <div class="card-price">From $105</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Imagine Dragons: Mercury Tour', 'Jan 18, 2026', 'T-Mobile Arena, Las Vegas')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/imagine.jpg" 
-                                alt="imagine">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Imagine Dragons: Mercury Tour</div>
-                            <div class="card-subtitle">Jan 18, 2026 • T-Mobile Arena</div>
-                            <div class="card-price">From $89</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Arctic Monkeys: The Car Tour', 'Jan 25, 2026', 'Madison Square Garden, New York')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/arctic.jpg" 
-                                alt="arctic">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Arctic Monkeys: The Car Tour</div>
-                            <div class="card-subtitle">Jan 25, 2026 • Madison Square Garden</div>
-                            <div class="card-price">From $99</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Kendrick Lamar: The Big Steppers', 'Feb 1, 2026', 'Staples Center, Los Angeles')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/kendrick.jpg" 
-                                alt="kendrick">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Kendrick Lamar: The Big Steppers</div>
-                            <div class="card-subtitle">Feb 1, 2026 • Staples Center</div>
-                            <div class="card-price">From $135</div>
-                        </div>
-                    </div>
-                    <div class="card" onclick="openModal('Kanye West: VULTURES Experience', 'Dec 5, 2025', 'United Center, Chicago')">
-                        <div class="card-image">
-                            <img class="img"
-                                src="/static/img/kanye.jpg" 
-                                alt="Kanye">
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">Kanye West: VULTURES Experience</div>
-                            <div class="card-subtitle">Dec 5, 2025 • United Center</div>
-                            <div class="card-price">From $110</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <p style="text-align: center; padding: 40px; color: #999;">No upcoming events at the moment. Check back soon!</p>
         </div>
-    </div>
-    
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="close-modal" onclick="closeModal()">×</button>
-                <h2 id="modal-title">Concert Title</h2>
-            </div>
-            <div class="modal-body">
-                <div class="modal-meta">
-                    <div>📅 <span id="modal-date">Date</span></div>
-                    <div>📍 <span id="modal-venue">Venue</span></div>
-                </div>
-                <div class="modal-description">
-                    <p>Get ready for an incredible live experience! This concert promises to be one of the most memorable performances of the year. With stunning visuals, incredible sound quality, and an unforgettable setlist, this is a show you won't want to miss.</p>
-                    <p>The venue offers state-of-the-art facilities with excellent acoustics and comfortable seating. Arrive early to explore merchandise stands and enjoy pre-show entertainment.</p>
-                </div>
-                <div class="ticket-section">
-                    <h3>Select Your Tickets</h3>
-                    <div class="ticket-options">
-                        <div class="ticket-option">
-                            <div class="ticket-info">
-                                <span class="ticket-type">General Admission</span>
-                                <span class="ticket-details">Standing room • Ages 16+</span>
-                            </div>
-                            <div class="ticket-price">$89</div>
-                        </div>
-                        <div class="ticket-option">
-                            <div class="ticket-info">
-                                <span class="ticket-type">Reserved Seating</span>
-                                <span class="ticket-details">Numbered seats • All ages</span>
-                            </div>
-                            <div class="ticket-price">$149</div>
-                        </div>
-                        <div class="ticket-option">
-                            <div class="ticket-info">
-                                <span class="ticket-type">VIP Package</span>
-                                <span class="ticket-details">Premium seats • Meet & greet • Merch</span>
-                            </div>
-                            <div class="ticket-price">$299</div>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-primary full-width">Proceed to Checkout</button>
-            </div>
-        </div>
+        {% endif %}
     </div>
 
 <footer class="imprint_footer">
@@ -329,7 +141,7 @@
 </footer>
 
     <script>
-        //header scroll effect
+        // Header scroll effect
         window.addEventListener('scroll', () => {
             const header = document.getElementById('header');
             if (window.scrollY > 50) {
@@ -339,30 +151,60 @@
             }
         });
 
-        //horizontal scroll function
-        function scroll(carouselId, amount) {
-            const carousel = document.getElementById(carouselId);
-            carousel.scrollBy({ left: amount, behavior: 'smooth' });
+        // Search functionality
+        function toggleSearch() {
+            const overlay = document.getElementById('searchOverlay');
+            const input = document.getElementById('searchInput');
+            overlay.classList.toggle('active');
+            if (overlay.classList.contains('active')) {
+                input.focus();
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+                input.value = '';
+                document.getElementById('searchResults').innerHTML = '';
+            }
         }
 
-        //modal functions
-        function openModal(title, date, venue) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-date').textContent = date;
-            document.getElementById('modal-venue').textContent = venue;
-            document.getElementById('modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
 
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetch(`/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultsDiv = document.getElementById('searchResults');
+                        if (data.length === 0) {
+                            resultsDiv.innerHTML = '<div class="no-results">No events found</div>';
+                        } else {
+                            resultsDiv.innerHTML = data.map(event => `
+                                <a href="/event/${event.event_id}" class="search-result-item">
+                                    <div class="search-result-title">${event.title}</div>
+                                    <div class="search-result-meta">
+                                        ${event.date} • ${event.venue} • ${event.genre}
+                                    </div>
+                                    <div class="search-result-price">${event.price}</div>
+                                </a>
+                            `).join('');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Search error:', err);
+                    });
+            }, 300);
+        });
 
-        //close modal on outside click
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') {
-                closeModal();
+        // Close search on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('searchOverlay').classList.contains('active')) {
+                toggleSearch();
             }
         });
     </script>

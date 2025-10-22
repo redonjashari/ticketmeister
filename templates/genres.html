@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse by Genre - Ticketmeister</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header id="header">
+        <a href="{{ url_for('home') }}" class="logo-link">
+            <div class="logo">Ticketmeister</div>
+        </a>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('genres') }}">Genres</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('maintenance') }}">Maintenance</a>
+                {% endif %}
+                <a href="{{ url_for('profile') }}">Profile</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+            <span class="search-icon" onclick="toggleSearch()">🔍</span>
+        </nav>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search events, venues, genres..." autocomplete="off">
+            <button onclick="toggleSearch()" class="close-search">×</button>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="genre-page">
+        <div class="genre-header">
+            <h1>Browse by Genre</h1>
+            <p>Explore concerts and events by your favorite music styles</p>
+        </div>
+
+        <div class="content">
+            {% if genres %}
+            <div class="genre-grid-large">
+                {% for genre_data in genres %}
+                <a href="{{ url_for('genre_events', genre_name=genre_data[0]) }}" class="genre-card-large">
+                    <div class="genre-card-content">
+                        <h3>{{ genre_data[0] }}</h3>
+                        <div class="genre-meta">
+                            <span class="genre-count">{{ genre_data[1] }} event{{ 's' if genre_data[1] != 1 else '' }}</span>
+                            {% if genre_data[2] %}
+                                <span class="genre-next">Next: {{ genre_data[2].strftime('%b %d') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="genre-arrow">→</div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-genres">
+                <h2>No Genres Available</h2>
+                <p>Check back soon for upcoming events!</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="imprint_footer">
+        <div class="imprint-content">
+            <h3><a href="{{ url_for('imprint')}}" class="imprint-link">Imprint</a></h3>
+        </div>
+    </footer>
+
+    <script>
+        // Search functionality
+        function toggleSearch() {
+            const overlay = document.getElementById('searchOverlay');
+            const input = document.getElementById('searchInput');
+            overlay.classList.toggle('active');
+            if (overlay.classList.contains('active')) {
+                input.focus();
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+                input.value = '';
+                document.getElementById('searchResults').innerHTML = '';
+            }
+        }
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetch(`/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultsDiv = document.getElementById('searchResults');
+                        if (data.length === 0) {
+                            resultsDiv.innerHTML = '<div class="no-results">No events found</div>';
+                        } else {
+                            resultsDiv.innerHTML = data.map(event => `
+                                <a href="/event/${event.event_id}" class="search-result-item">
+                                    <div class="search-result-title">${event.title}</div>
+                                    <div class="search-result-meta">
+                                        ${event.date} • ${event.venue} • ${event.genre}
+                                    </div>
+                                    <div class="search-result-price">${event.price}</div>
+                                </a>
+                            `).join('');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Search error:', err);
+                    });
+            }, 300);
+        });
+
+        // Close search on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('searchOverlay').classList.contains('active')) {
+                toggleSearch();
+            }
+        });
+    </script>
+</body>
+</html>
+

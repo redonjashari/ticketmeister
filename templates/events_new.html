@@ -20,7 +20,7 @@
         <span class="form-label">Venue</span>
         <select name="venue_id" required>
           {% for v in venues %}
-          <option value="{{ v.venue_id }}">{{ v.label }}</option>
+          <option value="{{ v[0] }}">{{ v[1] }}</option>
           {% endfor %}
         </select>
       </label>
@@ -39,6 +39,17 @@
           <option>postponed</option>
           <option>cancelled</option>
           <option>finished</option>
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Genre (Optional)</span>
+        <input name="genre" placeholder="e.g., Pop Rock, R&B/Pop">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Outdoor Event?</span>
+        <select name="is_outdoor">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
         </select>
       </label>
     </div>

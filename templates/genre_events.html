@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ genre }} Events - Ticketmeister</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header id="header">
+        <a href="{{ url_for('home') }}" class="logo-link">
+            <div class="logo">Ticketmeister</div>
+        </a>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}">Profile</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="genre-page">
+        <div class="genre-header">
+            <h1>{{ genre }} Events</h1>
+            <p>Discover all upcoming {{ genre.lower() }} concerts and events</p>
+        </div>
+
+        <div class="content">
+            {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                <div class="event-card" onclick="window.location.href='{{ url_for('event_details', event_id=event[0]) }}'">
+                    <div class="event-image">
+                        <img src="/static/img/hero1.jpg" alt="{{ event[1] }}">
+                    </div>
+                    <div class="event-info">
+                        <h3>{{ event[1] }}</h3>
+                        <p class="event-date">
+                            📅 {{ event[2].strftime('%A, %B %d, %Y') if event[2] else 'Date TBA' }}
+                        </p>
+                        <p class="event-venue">
+                            📍 {{ event[3] }}, {{ event[4] }}
+                        </p>
+                        <div class="event-footer">
+                            <span class="event-genre">{{ event[5] }}</span>
+                            <span class="event-price">
+                                {% if event[6] %}
+                                    From €{{ "%.0f"|format(event[6]) }}
+                                {% else %}
+                                    Price TBA
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-events">
+                <h2>No {{ genre }} Events Found</h2>
+                <p>There are currently no upcoming events in this genre.</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">Browse All Events</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="imprint_footer">
+        <div class="imprint-content">
+            <h3><a href="{{ url_for('imprint')}}" class="imprint-link">Imprint</a></h3>
+        </div>
+    </footer>
+</body>
+</html>
+

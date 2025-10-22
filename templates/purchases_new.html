@@ -12,7 +12,7 @@
         <span class="form-label">Customer</span>
         <select name="customer_id" required>
           {% for c in customers %}
-          <option value="{{ c.person_id }}">{{ c.label }}</option>
+          <option value="{{ c[0] }}">{{ c[1] }}</option>
           {% endfor %}
         </select>
       </label>

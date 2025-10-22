@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Ticketmeister</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header id="header">
+        <a href="{{ url_for('home') }}" class="logo-link">
+            <div class="logo">Ticketmeister</div>
+        </a>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('maintenance') }}">Maintenance</a>
+            {% endif %}
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                        <button onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="profile-container">
+        <div class="profile-sidebar">
+            <div class="profile-avatar">
+                {{ user_info[1][0] if user_info else 'U' }}{{ user_info[2][0] if user_info else '' }}
+            </div>
+            <h2>{{ user_info[1] if user_info else '' }} {{ user_info[2] if user_info else '' }}</h2>
+            <p class="profile-username">@{{ user_info[7] if user_info else '' }}</p>
+            <div class="loyalty-points">
+                <span class="points-icon">⭐</span>
+                <span class="points-value">{{ user_info[6] if user_info else 0 }}</span>
+                <span class="points-label">Loyalty Points</span>
+            </div>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary full-width">Edit Profile</a>
+        </div>
+
+        <div class="profile-main">
+            <div class="profile-section">
+                <h3>Personal Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Email</label>
+                        <p>{{ user_info[3] if user_info else 'Not provided' }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone</label>
+                        <p>{{ user_info[4] if user_info else 'Not provided' }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Date of Birth</label>
+                        <p>{{ user_info[5].strftime('%B %d, %Y') if user_info and user_info[5] else 'Not provided' }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Member Since</label>
+                        <p>{{ user_info[8].strftime('%B %Y') if user_info and user_info[8] else 'Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h3>Purchase History</h3>
+                {% if purchases %}
+                <div class="purchase-list">
+                    {% for purchase in purchases %}
+                    <div class="purchase-card">
+                        <div class="purchase-header">
+                            <div>
+                                <h4>{{ purchase[4] }}</h4>
+                                <p class="purchase-meta">
+                                    {{ purchase[5].strftime('%b %d, %Y at %I:%M %p') if purchase[5] else 'Date TBA' }} • {{ purchase[6] }}
+                                </p>
+                            </div>
+                            <div class="purchase-status {{ purchase[3] }}">
+                                {{ purchase[3].upper() }}
+                            </div>
+                        </div>
+                        <div class="purchase-details">
+                            <div class="purchase-info">
+                                <span>Order #{{ purchase[0] }}</span>
+                                <span>•</span>
+                                <span>{{ purchase[7] }} ticket{{ 's' if purchase[7] > 1 else '' }}</span>
+                            </div>
+                            <div class="purchase-amount">€{{ "%.2f"|format(purchase[2]) }}</div>
+                        </div>
+                        <div class="purchase-date">
+                            Purchased on {{ purchase[1].strftime('%b %d, %Y') if purchase[1] else 'Unknown' }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-purchases">You haven't made any purchases yet. <a href="{{ url_for('home') }}">Browse events</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="imprint_footer">
+        <div class="imprint-content">
+            <h3><a href="{{ url_for('imprint')}}" class="imprint-link">Imprint</a></h3>
+        </div>
+    </footer>
+</body>
+</html>
+

@@ -12,7 +12,7 @@
         <span class="form-label">Purchase</span>
         <select name="purchase_id" required>
           {% for p in purchases %}
-          <option value="{{ p.purchase_id }}">{{ p.label }}</option>
+          <option value="{{ p[0] }}">{{ p[1] }}</option>
           {% endfor %}
         </select>
       </label>
@@ -20,7 +20,7 @@
         <span class="form-label">Ticket</span>
         <select name="ticket_id" required>
           {% for t in tickets %}
-          <option value="{{ t.ticket_id }}">{{ t.label }}</option>
+          <option value="{{ t[0] }}">{{ t[1] }}</option>
           {% endfor %}
         </select>
       </label>

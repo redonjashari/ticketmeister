@@ -12,7 +12,7 @@
         <span class="form-label">Event</span>
         <select name="event_id" required>
           {% for e in events %}
-          <option value="{{ e.event_id }}">{{ e.label }}</option>
+          <option value="{{ e[0] }}">{{ e[1] }}</option>
           {% endfor %}
         </select>
       </label>
@@ -20,7 +20,7 @@
         <span class="form-label">Person</span>
         <select name="person_id" required>
           {% for p in persons %}
-          <option value="{{ p.person_id }}">{{ p.label }}</option>
+          <option value="{{ p[0] }}">{{ p[1] }}</option>
           {% endfor %}
         </select>
       </label>

@@ -12,7 +12,7 @@
         <span class="form-label">Purchase</span>
         <select name="purchase_id" required>
           {% for p in purchases %}
-          <option value="{{ p.purchase_id }}">{{ p.label }}</option>
+          <option value="{{ p[0] }}">{{ p[1] }}</option>
           {% endfor %}
         </select>
       </label>
