@@ -6,7 +6,7 @@
     <h1>Create Event</h1>
     <p>Launch a new performance, conference, or showcase with timing and venue details ready to go.</p>
   </header>
-  <form class="form-card" method="post" action="{{ url_for('events_create') }}">
+  <form class="form-card" method="post" action="{{ url_for('events_create') }}" enctype="multipart/form-data">
     <div class="form-grid">
       <label class="form-field">
         <span class="form-label">Title</span>
@@ -15,6 +15,16 @@
       <label class="form-field field-span">
         <span class="form-label">Description</span>
         <textarea name="e_description" placeholder="Add highlights, performers, or session details."></textarea>
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Event Image</span>
+        <input type="file" name="event_image" accept="image/*">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Upload JPG, PNG, or JPEG (recommended size: 1200x600px)</small>
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Or use existing image filename</span>
+        <input name="image_filename" placeholder="e.g., taylor_swift.jpeg (from /static/img/)">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Leave blank if uploading new image above</small>
       </label>
       <label class="form-field">
         <span class="form-label">Venue</span>

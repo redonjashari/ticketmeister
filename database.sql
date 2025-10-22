@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS performances;
 DROP TABLE IF EXISTS event_organizers;
 
 
+
 -- Base entity tables
 CREATE TABLE IF NOT EXISTS persons (
     person_id       INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,6 +30,25 @@ CREATE TABLE IF NOT EXISTS persons (
     date_of_birth   DATE,
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    user_id         INT AUTO_INCREMENT PRIMARY KEY,
+    person_id       INT UNIQUE,
+    username        VARCHAR(50) UNIQUE NOT NULL,
+    password_hash   VARCHAR(255) NOT NULL,
+    is_admin        TINYINT(1) DEFAULT 0,
+    is_active       TINYINT(1) DEFAULT 1,
+    reset_token     VARCHAR(255) NULL,
+    reset_token_expiry DATETIME NULL,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login      DATETIME NULL,
+    CONSTRAINT fk_users_person FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Add index for faster lookups
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_reset_token ON users(reset_token);
 
 CREATE TABLE IF NOT EXISTS customers (
     person_id       INT PRIMARY KEY,
@@ -206,6 +226,32 @@ CREATE TABLE IF NOT EXISTS event_organizers (
     CONSTRAINT fk_event_organizers_person FOREIGN KEY (person_id) REFERENCES persons(person_id) ON DELETE CASCADE,
     CONSTRAINT uq_event_person UNIQUE (event_id, person_id)
 ) ENGINE=InnoDB;
+
+-- Add image_path column to events table for event-specific images
+
+ALTER TABLE events 
+ADD COLUMN image_path VARCHAR(255) DEFAULT NULL 
+AFTER e_status;
+
+-- Update existing events with default images based on event_id
+UPDATE events SET image_path = 'taylor_swift.jpeg' WHERE event_id = 32;
+UPDATE events SET image_path = 'beyonce.jpg' WHERE event_id = 33;
+UPDATE events SET image_path = 'bad_bunny.jpeg' WHERE event_id = 34;
+UPDATE events SET image_path = 'kendrick.jpg' WHERE event_id = 35;
+UPDATE events SET image_path = 'billie.jpg' WHERE event_id = 36;
+UPDATE events SET image_path = 'drake.jpeg' WHERE event_id = 37;
+UPDATE events SET image_path = 'sza.jpg' WHERE event_id = 38;
+UPDATE events SET image_path = 'ed.jpg' WHERE event_id = 39;
+UPDATE events SET image_path = 'dua.png' WHERE event_id = 40;
+UPDATE events SET image_path = 'harry.jpg' WHERE event_id = 41;
+UPDATE events SET image_path = 'olivia.png' WHERE event_id = 42;
+UPDATE events SET image_path = 'travis.png' WHERE event_id = 43;
+UPDATE events SET image_path = 'tyler.jpg' WHERE event_id = 44;
+UPDATE events SET image_path = 'kanye.jpg' WHERE event_id = 45;
+UPDATE events SET image_path = '50cent.jpg' WHERE event_id = 46;
+UPDATE events SET image_path = 'cold.jpg' WHERE event_id = 47;
+UPDATE events SET image_path = 'imagine.jpg' WHERE event_id = 48;
+UPDATE events SET image_path = 'arctic.jpg' WHERE event_id = 49;
 
 
 -- Indexes

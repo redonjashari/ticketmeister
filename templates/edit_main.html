@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit Records · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Records</h1>
+    <p>Update existing records in the database.</p>
+  </header>
+  <div class="maintenance-grid">
+    <div class="maintenance-card">
+      <h2>Edit Person</h2>
+      <p>Update person information</p>
+      <a href="{{ url_for('persons_edit') }}" class="primary-button" style="background: #667eea;">Edit Person</a>
+    </div>
+    <div class="maintenance-card">
+      <h2>Edit Venue</h2>
+      <p>Update venue details</p>
+      <a href="{{ url_for('venues_edit') }}" class="primary-button" style="background: #667eea;">Edit Venue</a>
+    </div>
+    <div class="maintenance-card">
+      <h2>Edit Event</h2>
+      <p>Update event information</p>
+      <a href="{{ url_for('events_edit') }}" class="primary-button" style="background: #667eea;">Edit Event</a>
+    </div>
+    <div class="maintenance-card">
+      <h2>Edit Ticket</h2>
+      <p>Update ticket pricing and status</p>
+      <a href="{{ url_for('tickets_edit') }}" class="primary-button" style="background: #667eea;">Edit Ticket</a>
+    </div>
+    <div class="maintenance-card">
+      <h2>Edit Purchase</h2>
+      <p>Update purchase details</p>
+      <a href="{{ url_for('purchases_edit') }}" class="primary-button" style="background: #667eea;">Edit Purchase</a>
+    </div>
+  </div>
+  <div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('maintenance') }}" class="secondary-button">← Back to Maintenance</a>
+  </div>
+</section>
+{% endblock %}
+

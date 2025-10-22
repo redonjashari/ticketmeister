@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Edit Person · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Person</h1>
+    <p>Update person information</p>
+  </header>
+  {% if person %}
+  <form class="form-card" method="post" action="{{ url_for('persons_edit') }}">
+    <input type="hidden" name="person_id" value="{{ person[0] }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">First Name</span>
+        <input name="first_name" value="{{ person[1] }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Last Name</span>
+        <input name="last_name" value="{{ person[2] }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Email</span>
+        <input type="email" name="email" value="{{ person[3] or '' }}">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Phone</span>
+        <input name="phone" value="{{ person[4] or '' }}">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit" style="background: #667eea;">Update Person</button>
+      <a href="{{ url_for('persons_edit') }}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <p style="text-align: center; padding: 40px;">Person not found.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

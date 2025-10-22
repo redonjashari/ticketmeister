@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 import os
 from dotenv import load_dotenv
 from db_connection import get_db_connection as get_conn
@@ -12,10 +13,17 @@ load_dotenv()  # reads .env
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'img')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # User class for Flask-Login
 class User(UserMixin):
@@ -71,7 +79,8 @@ def home():
                     v.city,
                     ce.genre,
                     MIN(t.face_value) as min_price,
-                    COUNT(DISTINCT CASE WHEN t.ticket_status = 'available' THEN t.ticket_id END) as available_tickets
+                    COUNT(DISTINCT CASE WHEN t.ticket_status = 'available' THEN t.ticket_id END) as available_tickets,
+                    e.image_path
                 FROM events e
                 JOIN venues v ON e.venue_id = v.venue_id
                 LEFT JOIN concert_events ce ON e.event_id = ce.event_id
@@ -92,7 +101,8 @@ def home():
                     e.e_description,
                     v.v_name,
                     v.city,
-                    ce.genre
+                    ce.genre,
+                    e.image_path
                 FROM events e
                 JOIN venues v ON e.venue_id = v.venue_id
                 LEFT JOIN concert_events ce ON e.event_id = ce.event_id
@@ -175,7 +185,8 @@ def event_details(event_id):
                     v.country,
                     v.capacity,
                     ce.genre,
-                    ce.is_outdoor
+                    ce.is_outdoor,
+                    e.image_path
                 FROM events e
                 JOIN venues v ON e.venue_id = v.venue_id
                 LEFT JOIN concert_events ce ON e.event_id = ce.event_id
@@ -260,8 +271,12 @@ def genres():
     
     return render_template("genres.html", genres=genres_list)
 
-@app.route("/genre/<genre_name>")
+@app.route("/genre/<path:genre_name>")
 def genre_events(genre_name):
+    from urllib.parse import unquote
+    # Decode the URL-encoded genre name
+    genre_name = unquote(genre_name)
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute("""
@@ -272,7 +287,8 @@ def genre_events(genre_name):
                     v.v_name,
                     v.city,
                     ce.genre,
-                    MIN(t.face_value) as min_price
+                    MIN(t.face_value) as min_price,
+                    e.image_path
                 FROM events e
                 JOIN concert_events ce ON e.event_id = ce.event_id
                 JOIN venues v ON e.venue_id = v.venue_id
@@ -825,12 +841,34 @@ def events_create():
     genre = request.form.get("genre") or None
     is_outdoor = request.form.get("is_outdoor", "0")
     
+    # Handle image upload
+    image_path = None
+    
+    # Check if file was uploaded
+    if 'event_image' in request.files:
+        file = request.files['event_image']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Add timestamp to avoid collisions
+            name, ext = os.path.splitext(filename)
+            filename = f"{name}_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_path = filename
+    
+    # If no file uploaded, check for existing image filename
+    if not image_path:
+        image_filename = request.form.get("image_filename","").strip()
+        if image_filename:
+            # Verify the file exists in static/img
+            if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], image_filename)):
+                image_path = image_filename
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO events (title, e_description, venue_id, start_time, end_time, e_status)
-                VALUES (%s,%s,%s,%s,%s,%s)
-            """, (title, e_description, venue_id, start_time, end_time, e_status))
+                INSERT INTO events (title, e_description, venue_id, start_time, end_time, e_status, image_path)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """, (title, e_description, venue_id, start_time, end_time, e_status, image_path))
             event_id = cur.lastrowid
             
             # Add concert event details if genre provided
@@ -841,7 +879,11 @@ def events_create():
                 """, (event_id, genre, is_outdoor))
             
             conn.commit()
-        return render_template("feedback.html", title="Create Event", message="Event created successfully.")
+        
+        message = "Event created successfully."
+        if image_path:
+            message += f" Image: {image_path}"
+        return render_template("feedback.html", title="Create Event", message=message)
     except Exception as e:
         return render_template("feedback.html", title="Create Event", message=f"Error: {e}")
 
@@ -877,14 +919,39 @@ def tickets_create():
     currency = request.form.get("currency","EUR")
     ticket_status = request.form.get("ticket_status","available")
     issued_at = request.form.get("issued_at") or None
+    ticket_type = request.form.get("ticket_type", "general")
+    
     try:
         with get_conn() as conn, conn.cursor() as cur:
+            # Create the base ticket
             cur.execute("""
               INSERT INTO tickets (event_id, seat_id, face_value, currency, ticket_status, issued_at)
               VALUES (%s,%s,%s,%s,%s,%s)
             """, (event_id, seat_id, face_value, currency, ticket_status, issued_at))
+            ticket_id = cur.lastrowid
+            
+            # Create type-specific ticket entry
+            if ticket_type == "vip":
+                vip_level = request.form.get("vip_level", "Gold")
+                vip_perks = request.form.get("vip_perks") or None
+                lounge_access = request.form.get("lounge_access", "1")
+                
+                cur.execute("""
+                    INSERT INTO vip_tickets (ticket_id, perks, lounge_access, vip_level)
+                    VALUES (%s, %s, %s, %s)
+                """, (ticket_id, vip_perks, lounge_access, vip_level))
+            else:  # general or seat
+                refundable = request.form.get("refundable", "1")
+                refund_deadline = request.form.get("refund_deadline") or None
+                
+                cur.execute("""
+                    INSERT INTO regular_tickets (ticket_id, refundable, refund_deadline)
+                    VALUES (%s, %s, %s)
+                """, (ticket_id, refundable, refund_deadline))
+            
             conn.commit()
-        return render_template("feedback.html", title="Create Ticket", message="Ticket created successfully.")
+        return render_template("feedback.html", title="Create Ticket", 
+                             message=f"{ticket_type.upper()} ticket created successfully.")
     except Exception as e:
         return render_template("feedback.html", title="Create Ticket", message=f"Error: {e}")
 
@@ -1041,6 +1108,433 @@ def event_venue_create():
         return render_template("feedback.html", title="Link Event ↔ Venue", message="Event venue updated.")
     except Exception as e:
         return render_template("feedback.html", title="Link Event ↔ Venue", message=f"Error: {e}")
+
+# ============== DELETE OPERATIONS ==============
+
+@app.route("/delete")
+@admin_required
+def delete_main():
+    return render_template("delete_main.html")
+
+@app.route("/persons/delete", methods=["GET", "POST"])
+@admin_required
+def persons_delete():
+    if request.method == "POST":
+        person_id = request.form.get("person_id")
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("DELETE FROM persons WHERE person_id = %s", (person_id,))
+                conn.commit()
+            return render_template("feedback.html", title="Delete Person", message="Person deleted successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Delete Person", message=f"Error: {e}")
+    
+    # GET request - show form
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT person_id, CONCAT(first_name, ' ', last_name, ' (', COALESCE(email, 'no email'), ')') AS label
+                FROM persons ORDER BY last_name, first_name
+            """)
+            persons = cur.fetchall()
+    except:
+        persons = []
+    return render_template("delete_form.html", title="Delete Person", items=persons, 
+                         item_name="person_id", action_url=url_for('persons_delete'))
+
+@app.route("/venues/delete", methods=["GET", "POST"])
+@admin_required
+def venues_delete():
+    if request.method == "POST":
+        venue_id = request.form.get("venue_id")
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("DELETE FROM venues WHERE venue_id = %s", (venue_id,))
+                conn.commit()
+            return render_template("feedback.html", title="Delete Venue", message="Venue deleted successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Delete Venue", message=f"Error: {e}")
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT venue_id, CONCAT(v_name, ' - ', COALESCE(city, ''), ', ', COALESCE(country, '')) AS label
+                FROM venues ORDER BY v_name
+            """)
+            venues = cur.fetchall()
+    except:
+        venues = []
+    return render_template("delete_form.html", title="Delete Venue", items=venues,
+                         item_name="venue_id", action_url=url_for('venues_delete'))
+
+@app.route("/events/delete", methods=["GET", "POST"])
+@admin_required
+def events_delete():
+    if request.method == "POST":
+        event_id = request.form.get("event_id")
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("DELETE FROM events WHERE event_id = %s", (event_id,))
+                conn.commit()
+            return render_template("feedback.html", title="Delete Event", message="Event deleted successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Delete Event", message=f"Error: {e}")
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT e.event_id, CONCAT(e.title, ' - ', DATE_FORMAT(e.start_time, '%Y-%m-%d')) AS label
+                FROM events e ORDER BY e.start_time DESC
+            """)
+            events = cur.fetchall()
+    except:
+        events = []
+    return render_template("delete_form.html", title="Delete Event", items=events,
+                         item_name="event_id", action_url=url_for('events_delete'))
+
+@app.route("/tickets/delete", methods=["GET", "POST"])
+@admin_required
+def tickets_delete():
+    if request.method == "POST":
+        ticket_id = request.form.get("ticket_id")
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("DELETE FROM tickets WHERE ticket_id = %s", (ticket_id,))
+                conn.commit()
+            return render_template("feedback.html", title="Delete Ticket", message="Ticket deleted successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Delete Ticket", message=f"Error: {e}")
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT t.ticket_id, 
+                       CONCAT('#', t.ticket_id, ' - ', e.title, ' - €', t.face_value, ' (', t.ticket_status, ')') AS label
+                FROM tickets t
+                JOIN events e ON t.event_id = e.event_id
+                ORDER BY t.ticket_id DESC
+            """)
+            tickets = cur.fetchall()
+    except:
+        tickets = []
+    return render_template("delete_form.html", title="Delete Ticket", items=tickets,
+                         item_name="ticket_id", action_url=url_for('tickets_delete'))
+
+@app.route("/purchases/delete", methods=["GET", "POST"])
+@admin_required
+def purchases_delete():
+    if request.method == "POST":
+        purchase_id = request.form.get("purchase_id")
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("DELETE FROM purchases WHERE purchase_id = %s", (purchase_id,))
+                conn.commit()
+            return render_template("feedback.html", title="Delete Purchase", message="Purchase deleted successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Delete Purchase", message=f"Error: {e}")
+    
+    try:
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT p.purchase_id,
+                       CONCAT('#', p.purchase_id, ' - €', p.total_amount, ' (', p.purch_status, ') - ',
+                              DATE_FORMAT(p.purchase_time, '%Y-%m-%d')) AS label
+                FROM purchases p ORDER BY p.purchase_id DESC
+            """)
+            purchases = cur.fetchall()
+    except:
+        purchases = []
+    return render_template("delete_form.html", title="Delete Purchase", items=purchases,
+                         item_name="purchase_id", action_url=url_for('purchases_delete'))
+
+# ============== EDIT OPERATIONS ==============
+
+@app.route("/edit")
+@admin_required
+def edit_main():
+    return render_template("edit_main.html")
+
+@app.route("/persons/edit", methods=["GET", "POST"])
+@admin_required
+def persons_edit():
+    if request.method == "POST":
+        person_id = request.form.get("person_id")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        email = request.form.get("email") or None
+        phone = request.form.get("phone") or None
+        
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE persons 
+                    SET first_name = %s, last_name = %s, email = %s, phone = %s
+                    WHERE person_id = %s
+                """, (first_name, last_name, email, phone, person_id))
+                conn.commit()
+            return render_template("feedback.html", title="Edit Person", message="Person updated successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Edit Person", message=f"Error: {e}")
+    
+    # GET request - show selection or edit form
+    person_id = request.args.get("id")
+    if person_id:
+        # Show edit form for specific person
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("SELECT * FROM persons WHERE person_id = %s", (person_id,))
+                person = cur.fetchone()
+                if not person:
+                    flash("Person not found.", "error")
+                    return redirect(url_for('persons_edit'))
+        except:
+            person = None
+        return render_template("persons_edit_form.html", person=person)
+    else:
+        # Show selection list
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT person_id, CONCAT(first_name, ' ', last_name, ' (', COALESCE(email, 'no email'), ')') AS label
+                    FROM persons ORDER BY last_name, first_name
+                """)
+                persons = cur.fetchall()
+        except:
+            persons = []
+        return render_template("edit_select.html", title="Edit Person", items=persons,
+                             item_name="person_id", edit_url="persons_edit")
+
+@app.route("/venues/edit", methods=["GET", "POST"])
+@admin_required
+def venues_edit():
+    if request.method == "POST":
+        venue_id = request.form.get("venue_id")
+        v_name = request.form.get("v_name")
+        v_address = request.form.get("v_address") or None
+        city = request.form.get("city") or None
+        country = request.form.get("country") or None
+        capacity = request.form.get("capacity") or None
+        
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE venues 
+                    SET v_name = %s, v_address = %s, city = %s, country = %s, capacity = %s
+                    WHERE venue_id = %s
+                """, (v_name, v_address, city, country, capacity, venue_id))
+                conn.commit()
+            return render_template("feedback.html", title="Edit Venue", message="Venue updated successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Edit Venue", message=f"Error: {e}")
+    
+    venue_id = request.args.get("id")
+    if venue_id:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("SELECT * FROM venues WHERE venue_id = %s", (venue_id,))
+                venue = cur.fetchone()
+                if not venue:
+                    flash("Venue not found.", "error")
+                    return redirect(url_for('venues_edit'))
+        except:
+            venue = None
+        return render_template("venues_edit_form.html", venue=venue)
+    else:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT venue_id, CONCAT(v_name, ' - ', COALESCE(city, ''), ', ', COALESCE(country, '')) AS label
+                    FROM venues ORDER BY v_name
+                """)
+                venues = cur.fetchall()
+        except:
+            venues = []
+        return render_template("edit_select.html", title="Edit Venue", items=venues,
+                             item_name="venue_id", edit_url="venues_edit")
+
+@app.route("/events/edit", methods=["GET", "POST"])
+@admin_required
+def events_edit():
+    if request.method == "POST":
+        event_id = request.form.get("event_id")
+        title = request.form.get("title")
+        e_description = request.form.get("e_description") or None
+        venue_id = request.form.get("venue_id")
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time") or None
+        e_status = request.form.get("e_status")
+        image_filename = request.form.get("image_filename") or None
+        genre = request.form.get("genre") or None
+        is_outdoor = request.form.get("is_outdoor", "0")
+        
+        # Handle image upload
+        image_path = image_filename
+        if 'event_image' in request.files:
+            file = request.files['event_image']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                name, ext = os.path.splitext(filename)
+                filename = f"{name}_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_path = filename
+        
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE events 
+                    SET title = %s, e_description = %s, venue_id = %s, start_time = %s, 
+                        end_time = %s, e_status = %s, image_path = %s
+                    WHERE event_id = %s
+                """, (title, e_description, venue_id, start_time, end_time, e_status, image_path, event_id))
+                
+                # Update concert event details if genre provided
+                if genre:
+                    cur.execute("""
+                        INSERT INTO concert_events (event_id, genre, is_outdoor)
+                        VALUES (%s, %s, %s)
+                        ON DUPLICATE KEY UPDATE genre = %s, is_outdoor = %s
+                    """, (event_id, genre, is_outdoor, genre, is_outdoor))
+                
+                conn.commit()
+            return render_template("feedback.html", title="Edit Event", message="Event updated successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Edit Event", message=f"Error: {e}")
+    
+    event_id = request.args.get("id")
+    if event_id:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT e.*, ce.genre, ce.is_outdoor
+                    FROM events e
+                    LEFT JOIN concert_events ce ON e.event_id = ce.event_id
+                    WHERE e.event_id = %s
+                """, (event_id,))
+                event = cur.fetchone()
+                if not event:
+                    flash("Event not found.", "error")
+                    return redirect(url_for('events_edit'))
+        except:
+            event = None
+        return render_template("events_edit_form.html", event=event, venues=get_venues())
+    else:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT e.event_id, CONCAT(e.title, ' - ', DATE_FORMAT(e.start_time, '%Y-%m-%d')) AS label
+                    FROM events e ORDER BY e.start_time DESC
+                """)
+                events = cur.fetchall()
+        except:
+            events = []
+        return render_template("edit_select.html", title="Edit Event", items=events,
+                             item_name="event_id", edit_url="events_edit")
+
+@app.route("/tickets/edit", methods=["GET", "POST"])
+@admin_required
+def tickets_edit():
+    if request.method == "POST":
+        ticket_id = request.form.get("ticket_id")
+        face_value = request.form.get("face_value")
+        ticket_status = request.form.get("ticket_status")
+        
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE tickets 
+                    SET face_value = %s, ticket_status = %s
+                    WHERE ticket_id = %s
+                """, (face_value, ticket_status, ticket_id))
+                conn.commit()
+            return render_template("feedback.html", title="Edit Ticket", message="Ticket updated successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Edit Ticket", message=f"Error: {e}")
+    
+    ticket_id = request.args.get("id")
+    if ticket_id:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT t.*, e.title as event_title
+                    FROM tickets t
+                    JOIN events e ON t.event_id = e.event_id
+                    WHERE t.ticket_id = %s
+                """, (ticket_id,))
+                ticket = cur.fetchone()
+                if not ticket:
+                    flash("Ticket not found.", "error")
+                    return redirect(url_for('tickets_edit'))
+        except:
+            ticket = None
+        return render_template("tickets_edit_form.html", ticket=ticket)
+    else:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT t.ticket_id, 
+                           CONCAT('#', t.ticket_id, ' - ', e.title, ' - €', t.face_value, ' (', t.ticket_status, ')') AS label
+                    FROM tickets t
+                    JOIN events e ON t.event_id = e.event_id
+                    ORDER BY t.ticket_id DESC
+                """)
+                tickets = cur.fetchall()
+        except:
+            tickets = []
+        return render_template("edit_select.html", title="Edit Ticket", items=tickets,
+                             item_name="ticket_id", edit_url="tickets_edit")
+
+@app.route("/purchases/edit", methods=["GET", "POST"])
+@admin_required
+def purchases_edit():
+    if request.method == "POST":
+        purchase_id = request.form.get("purchase_id")
+        total_amount = request.form.get("total_amount")
+        purch_status = request.form.get("purch_status")
+        
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE purchases 
+                    SET total_amount = %s, purch_status = %s
+                    WHERE purchase_id = %s
+                """, (total_amount, purch_status, purchase_id))
+                conn.commit()
+            return render_template("feedback.html", title="Edit Purchase", message="Purchase updated successfully.")
+        except Exception as e:
+            return render_template("feedback.html", title="Edit Purchase", message=f"Error: {e}")
+    
+    purchase_id = request.args.get("id")
+    if purchase_id:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT p.*, CONCAT(per.first_name, ' ', per.last_name) as customer_name
+                    FROM purchases p
+                    JOIN customers c ON p.customer_id = c.person_id
+                    JOIN persons per ON c.person_id = per.person_id
+                    WHERE p.purchase_id = %s
+                """, (purchase_id,))
+                purchase = cur.fetchone()
+                if not purchase:
+                    flash("Purchase not found.", "error")
+                    return redirect(url_for('purchases_edit'))
+        except:
+            purchase = None
+        return render_template("purchases_edit_form.html", purchase=purchase)
+    else:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT p.purchase_id,
+                           CONCAT('#', p.purchase_id, ' - €', p.total_amount, ' (', p.purch_status, ') - ',
+                                  DATE_FORMAT(p.purchase_time, '%Y-%m-%d')) AS label
+                    FROM purchases p ORDER BY p.purchase_id DESC
+                """)
+                purchases = cur.fetchall()
+        except:
+            purchases = []
+        return render_template("edit_select.html", title="Edit Purchase", items=purchases,
+                             item_name="purchase_id", edit_url="purchases_edit")
 
 if __name__ == '__main__':
     app.run(debug=True)

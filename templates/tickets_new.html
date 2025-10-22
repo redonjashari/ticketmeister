@@ -17,9 +17,17 @@
         </select>
       </label>
       <label class="form-field">
-        <span class="form-label">Seat (optional)</span>
+        <span class="form-label">Ticket Type</span>
+        <select name="ticket_type" id="ticket_type" required onchange="updateTicketFields()">
+          <option value="general">General Admission</option>
+          <option value="seat">Seat Ticket</option>
+          <option value="vip">VIP Ticket</option>
+        </select>
+      </label>
+      <label class="form-field" id="seat_field" style="display: none;">
+        <span class="form-label">Seat</span>
         <select name="seat_id">
-          <option value="">-- no seat --</option>
+          <option value="">-- select seat --</option>
           {% for s in seats %}
           <option value="{{ s[0] }}">{{ s[1] }}</option>
           {% endfor %}
@@ -46,10 +54,77 @@
         <span class="form-label">Issued at</span>
         <input type="datetime-local" name="issued_at">
       </label>
+      <label class="form-field" id="vip_level_field" style="display: none;">
+        <span class="form-label">VIP Level</span>
+        <select name="vip_level">
+          <option value="Gold">Gold</option>
+          <option value="Platinum">Platinum</option>
+          <option value="Diamond">Diamond</option>
+        </select>
+      </label>
+      <label class="form-field field-span" id="vip_perks_field" style="display: none;">
+        <span class="form-label">VIP Perks</span>
+        <textarea name="vip_perks" placeholder="Meet & Greet, Backstage Pass, Priority Entry"></textarea>
+      </label>
+      <label class="form-field" id="lounge_access_field" style="display: none;">
+        <span class="form-label">Lounge Access</span>
+        <select name="lounge_access">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </label>
+      <label class="form-field" id="refundable_field" style="display: none;">
+        <span class="form-label">Refundable</span>
+        <select name="refundable">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </label>
+      <label class="form-field" id="refund_deadline_field" style="display: none;">
+        <span class="form-label">Refund Deadline</span>
+        <input type="datetime-local" name="refund_deadline">
+      </label>
     </div>
     <div class="form-actions">
       <button class="primary-button" type="submit">Create Ticket</button>
     </div>
   </form>
 </section>
+
+<script>
+function updateTicketFields() {
+  const ticketType = document.getElementById('ticket_type').value;
+  const seatField = document.getElementById('seat_field');
+  const vipLevelField = document.getElementById('vip_level_field');
+  const vipPerksField = document.getElementById('vip_perks_field');
+  const loungeAccessField = document.getElementById('lounge_access_field');
+  const refundableField = document.getElementById('refundable_field');
+  const refundDeadlineField = document.getElementById('refund_deadline_field');
+  
+  // Hide all optional fields
+  seatField.style.display = 'none';
+  vipLevelField.style.display = 'none';
+  vipPerksField.style.display = 'none';
+  loungeAccessField.style.display = 'none';
+  refundableField.style.display = 'none';
+  refundDeadlineField.style.display = 'none';
+  
+  if (ticketType === 'seat') {
+    seatField.style.display = 'block';
+    refundableField.style.display = 'block';
+    refundDeadlineField.style.display = 'block';
+  } else if (ticketType === 'vip') {
+    seatField.style.display = 'block';
+    vipLevelField.style.display = 'block';
+    vipPerksField.style.display = 'block';
+    loungeAccessField.style.display = 'block';
+  } else if (ticketType === 'general') {
+    refundableField.style.display = 'block';
+    refundDeadlineField.style.display = 'block';
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', updateTicketFields);
+</script>
 {% endblock %}

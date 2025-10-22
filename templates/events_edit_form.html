@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Edit Event · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Event</h1>
+    <p>Update event information</p>
+  </header>
+  {% if event %}
+  <form class="form-card" method="post" action="{{ url_for('events_edit') }}" enctype="multipart/form-data">
+    <input type="hidden" name="event_id" value="{{ event[0] }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Title</span>
+        <input name="title" value="{{ event[1] }}" required>
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Description</span>
+        <textarea name="e_description">{{ event[2] or '' }}</textarea>
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Event Image</span>
+        <input type="file" name="event_image" accept="image/*">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Upload new image (optional)</small>
+      </label>
+      <label class="form-field field-span">
+        <span class="form-label">Or use existing image filename</span>
+        <input name="image_filename" value="{{ event[8] or '' }}" placeholder="e.g., taylor_swift.jpeg">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Current: {{ event[8] or 'None (using default)' }}</small>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Venue</span>
+        <select name="venue_id" required>
+          {% for v in venues %}
+          <option value="{{ v[0] }}" {% if v[0] == event[3] %}selected{% endif %}>{{ v[1] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Start Time</span>
+        <input type="datetime-local" name="start_time" value="{{ event[4].strftime('%Y-%m-%dT%H:%M') if event[4] else '' }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">End Time</span>
+        <input type="datetime-local" name="end_time" value="{{ event[5].strftime('%Y-%m-%dT%H:%M') if event[5] else '' }}">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="e_status">
+          <option {% if event[6] == 'scheduled' %}selected{% endif %}>scheduled</option>
+          <option {% if event[6] == 'postponed' %}selected{% endif %}>postponed</option>
+          <option {% if event[6] == 'cancelled' %}selected{% endif %}>cancelled</option>
+          <option {% if event[6] == 'finished' %}selected{% endif %}>finished</option>
+        </select>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Genre (Optional)</span>
+        <input name="genre" value="{{ event[9] or '' }}" placeholder="e.g., Pop Rock">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Outdoor Event?</span>
+        <select name="is_outdoor">
+          <option value="0" {% if event[10] == 0 %}selected{% endif %}>No</option>
+          <option value="1" {% if event[10] == 1 %}selected{% endif %}>Yes</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit" style="background: #667eea;">Update Event</button>
+      <a href="{{ url_for('events_edit') }}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <p style="text-align: center; padding: 40px;">Event not found.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

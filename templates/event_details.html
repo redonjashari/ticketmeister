@@ -37,7 +37,7 @@
     {% endwith %}
 
     {% if event %}
-    <div class="event-detail-hero" style="background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(20,20,20,1)), url('/static/img/hero1.jpg'); background-size: cover;">
+    <div class="event-detail-hero" style="background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(20,20,20,1)), url('/static/img/{{ event[12] if event[12] else 'hero1.jpg' }}'); background-size: cover;">
         <div class="event-detail-content">
             <h1>{{ event[1] }}</h1>
             <div class="event-meta">

@@ -1469,6 +1469,7 @@ body > hr {
 .genre-header {
     text-align: center;
     margin-bottom: 50px;
+    position: relative;
 }
 
 .genre-header h1 {
@@ -1479,6 +1480,42 @@ body > hr {
 .genre-header p {
     font-size: 18px;
     color: #b3b3b3;
+}
+
+.back-to-genres {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    color: #e5e5e5;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-to-genres:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: #fff;
+    transform: translateX(-3px);
+}
+
+.back-arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.back-to-genres:hover .back-arrow {
+    transform: translateX(-3px);
+}
+
+.back-text {
+    letter-spacing: 0.02em;
 }
 
 /* Genre Grid on Homepage */
@@ -1740,4 +1777,72 @@ body > hr {
     .events-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Maintenance Grid */
+.maintenance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.maintenance-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.maintenance-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(102, 126, 234, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.maintenance-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #fff;
+}
+
+.maintenance-card p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Delete Warning */
+.page-header p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+}
+
+/* Secondary Button */
+.secondary-button {
+    display: inline-block;
+    padding: 12px 32px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.secondary-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Field Span */
+.field-span {
+    grid-column: 1 / -1;
 }

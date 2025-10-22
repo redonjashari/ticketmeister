@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Edit Venue · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Venue</h1>
+    <p>Update venue information</p>
+  </header>
+  {% if venue %}
+  <form class="form-card" method="post" action="{{ url_for('venues_edit') }}">
+    <input type="hidden" name="venue_id" value="{{ venue[0] }}">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-label">Venue Name</span>
+        <input name="v_name" value="{{ venue[1] }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Address</span>
+        <input name="v_address" value="{{ venue[2] or '' }}">
+      </label>
+      <label class="form-field">
+        <span class="form-label">City</span>
+        <input name="city" value="{{ venue[3] or '' }}">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Country</span>
+        <input name="country" value="{{ venue[4] or '' }}">
+      </label>
+      <label class="form-field">
+        <span class="form-label">Capacity</span>
+        <input type="number" name="capacity" value="{{ venue[5] or '' }}">
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit" style="background: #667eea;">Update Venue</button>
+      <a href="{{ url_for('venues_edit') }}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <p style="text-align: center; padding: 40px;">Venue not found.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

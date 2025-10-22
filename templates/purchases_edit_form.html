@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Edit Purchase · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Purchase</h1>
+    <p>Update purchase details</p>
+  </header>
+  {% if purchase %}
+  <form class="form-card" method="post" action="{{ url_for('purchases_edit') }}">
+    <input type="hidden" name="purchase_id" value="{{ purchase[0] }}">
+    <div class="form-grid">
+      <label class="form-field field-span">
+        <span class="form-label">Customer</span>
+        <input value="{{ purchase[5] }}" disabled style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Customer cannot be changed</small>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Total Amount (€)</span>
+        <input type="number" step="0.01" name="total_amount" value="{{ purchase[2] }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="purch_status">
+          <option {% if purchase[3] == 'pending' %}selected{% endif %}>pending</option>
+          <option {% if purchase[3] == 'confirmed' %}selected{% endif %}>confirmed</option>
+          <option {% if purchase[3] == 'cancelled' %}selected{% endif %}>cancelled</option>
+          <option {% if purchase[3] == 'refunded' %}selected{% endif %}>refunded</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit" style="background: #667eea;">Update Purchase</button>
+      <a href="{{ url_for('purchases_edit') }}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <p style="text-align: center; padding: 40px;">Purchase not found.</p>
+  {% endif %}
+</section>
+{% endblock %}
+

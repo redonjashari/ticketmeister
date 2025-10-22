@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Edit Ticket · TicketMeister{% endblock %}
+{% block content %}
+<section class="page-shell">
+  <header class="page-header">
+    <h1>Edit Ticket</h1>
+    <p>Update ticket pricing and status</p>
+  </header>
+  {% if ticket %}
+  <form class="form-card" method="post" action="{{ url_for('tickets_edit') }}">
+    <input type="hidden" name="ticket_id" value="{{ ticket[0] }}">
+    <div class="form-grid">
+      <label class="form-field field-span">
+        <span class="form-label">Event</span>
+        <input value="{{ ticket[8] }}" disabled style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">
+        <small style="color: rgba(255,255,255,0.6); margin-top: 4px; display: block;">Event cannot be changed</small>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Face Value (€)</span>
+        <input type="number" step="0.01" name="face_value" value="{{ ticket[3] }}" required>
+      </label>
+      <label class="form-field">
+        <span class="form-label">Status</span>
+        <select name="ticket_status">
+          <option {% if ticket[5] == 'available' %}selected{% endif %}>available</option>
+          <option {% if ticket[5] == 'reserved' %}selected{% endif %}>reserved</option>
+          <option {% if ticket[5] == 'sold' %}selected{% endif %}>sold</option>
+          <option {% if ticket[5] == 'cancelled' %}selected{% endif %}>cancelled</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="primary-button" type="submit" style="background: #667eea;">Update Ticket</button>
+      <a href="{{ url_for('tickets_edit') }}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <p style="text-align: center; padding: 40px;">Ticket not found.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
