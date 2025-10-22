@@ -8,7 +8,8 @@
 </head>
 <body class="app-body {% block body_class %}{% endblock %}">
   <nav class="app-nav">
-    <a class="app-nav__brand" href="{{ url_for('home') }}">Maintenance</a>
+    <a class="app-nav__brand" href="{{ url_for('home') }}">Home</a>
+    <a class="app-nav__brand" href="{{ url_for('maintenance') }}">Maintenance</a>
   </nav>
   <main class="app-main">
     {% block content %}{% endblock %}

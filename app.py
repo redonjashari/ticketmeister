@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import os
 from dotenv import load_dotenv
 from db_connection import get_db_connection as get_conn
@@ -9,7 +9,20 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 
 @app.route("/")
 def home():
+    return render_template("index.html")
+
+@app.route("/maintenance")
+def maintenance():
     return render_template("maintenance.html")
+
+@app.route("/index")
+@app.route("/index.html")
+def index_page():
+    return render_template("index.html")
+
+@app.route("/home_page")
+def home_page():
+    return redirect(url_for("home"))
 
 @app.route("/persons/new")
 def persons_new():
@@ -249,7 +262,7 @@ def purchase_items_create():
 
 @app.route("/event-venue/new")
 def event_venue_new():
-    return render_template("event_venue_new.html", events=get_events(), venues=get_venues())
+    return render_template("events_venue_new.html", events=get_events(), venues=get_venues())
 
 @app.route("/event-venue/create", methods=["POST"])
 def event_venue_create():

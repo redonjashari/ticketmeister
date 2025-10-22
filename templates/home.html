@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ticketmeister · Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <header id="header">
+        <div class="logo">Ticketmeister</div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('index_page') }}">Experience</a>
+            <a class="btn btn-secondary" href="{{ url_for('maintenance') }}">Maintenance</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Every seat, every show, one place.</h1>
+            <div class="meta">
+                <span>Plan Events</span>
+                <span>Delight Fans</span>
+                <span>Operate Smoothly</span>
+            </div>
+            <p>Welcome to Ticketmeister. Explore the fan experience, then jump into the maintenance console when it is time to manage your data.</p>
+            <div class="hero-buttons">
+                <a class="btn btn-primary" href="{{ url_for('index_page') }}">Browse Featured Events</a>
+                <a class="btn btn-secondary" href="{{ url_for('maintenance') }}">Open Maintenance Console</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section">
+            <h2 class="section-title">Choose your path</h2>
+            <p>Navigate to the public showcase or administer your catalog.</p>
+            <div class="hero-buttons">
+                <a class="btn btn-primary" href="{{ url_for('index_page') }}">Fan Experience</a>
+                <a class="btn btn-secondary" href="{{ url_for('maintenance') }}">Maintenance Tools</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="imprint_footer">
+        <div class="imprint-content">
+            <h3><a href="imprint.html" class="imprint-link">Imprint</a></h3>
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (!header) return;
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
