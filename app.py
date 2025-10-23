@@ -1622,4 +1622,4 @@ def purchases_edit():
                              item_name="purchase_id", edit_url="purchases_edit")
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(host='10.60.36.1', debug=True, port=8010)
