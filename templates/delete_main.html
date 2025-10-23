@@ -2,39 +2,57 @@
 {% block title %}Delete Records · TicketMeister{% endblock %}
 {% block content %}
 <section class="page-shell">
-  <header class="page-header">
-    <h1>Delete Records</h1>
-    <p>⚠️ Use caution when deleting records. These operations cannot be undone.</p>
-  </header>
-  <div class="maintenance-grid">
-    <div class="maintenance-card">
-      <h2>Delete Person</h2>
-      <p>Remove a person from the database</p>
-      <a href="{{ url_for('persons_delete') }}" class="primary-button" style="background: #dc3545;">Delete Person</a>
+  <div class="delete-main-container">
+    <header class="delete-main-header">
+      <h1>Delete Records</h1>
+      <p>⚠️ Use caution when deleting records. These operations cannot be undone.</p>
+    </header>
+    
+    <div class="delete-main-grid">
+      <div class="delete-main-card">
+        <div class="delete-main-card-content">
+          <h2>Delete Person</h2>
+          <p>Remove a person from the database</p>
+        </div>
+        <a href="{{ url_for('persons_delete') }}" class="delete-main-button">Delete Person</a>
+      </div>
+      
+      <div class="delete-main-card">
+        <div class="delete-main-card-content">
+          <h2>Delete Venue</h2>
+          <p>Remove a venue from the database</p>
+        </div>
+        <a href="{{ url_for('venues_delete') }}" class="delete-main-button">Delete Venue</a>
+      </div>
+      
+      <div class="delete-main-card">
+        <div class="delete-main-card-content">
+          <h2>Delete Event</h2>
+          <p>Remove an event from the database</p>
+        </div>
+        <a href="{{ url_for('events_delete') }}" class="delete-main-button">Delete Event</a>
+      </div>
+      
+      <div class="delete-main-card">
+        <div class="delete-main-card-content">
+          <h2>Delete Ticket</h2>
+          <p>Remove a ticket from the database</p>
+        </div>
+        <a href="{{ url_for('tickets_delete') }}" class="delete-main-button">Delete Ticket</a>
+      </div>
+      
+      <div class="delete-main-card">
+        <div class="delete-main-card-content">
+          <h2>Delete Purchase</h2>
+          <p>Remove a purchase record from the database</p>
+        </div>
+        <a href="{{ url_for('purchases_delete') }}" class="delete-main-button">Delete Purchase</a>
+      </div>
     </div>
-    <div class="maintenance-card">
-      <h2>Delete Venue</h2>
-      <p>Remove a venue from the database</p>
-      <a href="{{ url_for('venues_delete') }}" class="primary-button" style="background: #dc3545;">Delete Venue</a>
+    
+    <div class="delete-main-back">
+      <a href="{{ url_for('maintenance') }}" class="delete-main-back-button">← Back to Maintenance</a>
     </div>
-    <div class="maintenance-card">
-      <h2>Delete Event</h2>
-      <p>Remove an event from the database</p>
-      <a href="{{ url_for('events_delete') }}" class="primary-button" style="background: #dc3545;">Delete Event</a>
-    </div>
-    <div class="maintenance-card">
-      <h2>Delete Ticket</h2>
-      <p>Remove a ticket from the database</p>
-      <a href="{{ url_for('tickets_delete') }}" class="primary-button" style="background: #dc3545;">Delete Ticket</a>
-    </div>
-    <div class="maintenance-card">
-      <h2>Delete Purchase</h2>
-      <p>Remove a purchase record from the database</p>
-      <a href="{{ url_for('purchases_delete') }}" class="primary-button" style="background: #dc3545;">Delete Purchase</a>
-    </div>
-  </div>
-  <div style="margin-top: 2rem; text-align: center;">
-    <a href="{{ url_for('maintenance') }}" class="secondary-button">← Back to Maintenance</a>
   </div>
 </section>
 {% endblock %}

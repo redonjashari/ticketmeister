@@ -396,3 +396,311 @@ textarea {
     width: 100%;
   }
 }
+
+/* Minimalistic Edit Main Styling */
+.edit-main-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+}
+
+.edit-main-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.edit-main-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.edit-main-header p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.edit-main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.edit-main-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.edit-main-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.edit-main-card-content {
+  flex: 1;
+  text-align: left;
+}
+
+.edit-main-card h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  margin-top: 0;
+}
+
+.edit-main-card p {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.edit-main-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-main-button:hover {
+  background: #5a6fd8;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.edit-main-back {
+  text-align: center;
+  margin-top: 2rem;
+  /* padding-top: 1.5rem; */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
+}
+
+.edit-main-back-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.edit-main-back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-decoration: none;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .edit-main-container {
+    padding: 1rem;
+  }
+  
+  .edit-main-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .edit-main-card {
+    padding: 1.25rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .edit-main-card-content {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-main-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .edit-main-card {
+    padding: 1rem;
+  }
+  
+  .edit-main-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Delete Main Page Styling - Horizontal Layout */
+.delete-main-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+}
+
+.delete-main-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.delete-main-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.delete-main-header p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.delete-main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.delete-main-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.delete-main-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.delete-main-card-content {
+  flex: 1;
+  text-align: left;
+}
+
+.delete-main-card h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  margin-top: 0;
+}
+
+.delete-main-card p {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.delete-main-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #dc3545;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-main-button:hover {
+  background: #c82333;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.delete-main-back {
+  text-align: center;
+  margin-top: 2rem;
+  /* padding-top: 1.5rem; */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
+}
+
+.delete-main-back-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.delete-main-back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-decoration: none;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design for Delete Main */
+@media (max-width: 768px) {
+  .delete-main-container {
+    padding: 1rem;
+  }
+  
+  .delete-main-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .delete-main-card {
+    padding: 1.25rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .delete-main-card-content {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-main-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .delete-main-card {
+    padding: 1rem;
+  }
+  
+  .delete-main-button {
+    width: 100%;
+    text-align: center;
+  }
+}

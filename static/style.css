@@ -116,19 +116,23 @@ nav a:hover {
 .btn-primary {
     background-color: #fff;
     color: #000;
+    text-decoration: none;
 }
 
 .btn-primary:hover {
     background-color: #e5e5e5;
+    text-decoration: none;
 }
 
 .btn-secondary {
     background-color: rgba(109, 109, 110, 0.7);
     color: #fff;
+    text-decoration: none;
 }
 
 .btn-secondary:hover {
     background-color: rgba(109, 109, 110, 0.5);
+    text-decoration: none;
 }
 
 .btn.full-width {
@@ -371,6 +375,7 @@ nav a:hover {
 
 .ticket-price {
     font-size: 18px;
+    margin-left: 85px;
     font-weight: 600;
     color: #46d369;
 }
@@ -1175,6 +1180,43 @@ body > hr {
 
 .event-detail-content {
     max-width: 800px;
+    position: relative;
+}
+
+.back-to-home {
+    position: absolute;
+    top: -60px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.back-to-home:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-decoration: none;
+    transform: translateX(-4px);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.back-to-home .back-arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.back-to-home:hover .back-arrow {
+    transform: translateX(-2px);
 }
 
 .event-detail-content h1 {

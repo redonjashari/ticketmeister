@@ -92,7 +92,7 @@ def home():
             """)
             upcoming_events = cur.fetchall()
             
-            # Get featured event (next big event)
+            # Get featured event (The Weeknd specifically, or fallback to next big event)
             cur.execute("""
                 SELECT 
                     e.event_id,
@@ -107,10 +107,32 @@ def home():
                 JOIN venues v ON e.venue_id = v.venue_id
                 LEFT JOIN concert_events ce ON e.event_id = ce.event_id
                 WHERE e.start_time > NOW() AND e.e_status = 'scheduled'
+                AND (e.title LIKE '%Weeknd%' OR e.title LIKE '%weeknd%')
                 ORDER BY e.start_time ASC
                 LIMIT 1
             """)
             featured_event = cur.fetchone()
+            
+            # If no Weeknd event found, fallback to next upcoming event
+            if not featured_event:
+                cur.execute("""
+                    SELECT 
+                        e.event_id,
+                        e.title,
+                        e.start_time,
+                        e.e_description,
+                        v.v_name,
+                        v.city,
+                        ce.genre,
+                        e.image_path
+                    FROM events e
+                    JOIN venues v ON e.venue_id = v.venue_id
+                    LEFT JOIN concert_events ce ON e.event_id = ce.event_id
+                    WHERE e.start_time > NOW() AND e.e_status = 'scheduled'
+                    ORDER BY e.start_time ASC
+                    LIMIT 1
+                """)
+                featured_event = cur.fetchone()
             
     except Exception as e:
         print(f"Error loading home page: {e}")
@@ -1123,6 +1145,22 @@ def persons_delete():
         person_id = request.form.get("person_id")
         try:
             with get_conn() as conn, conn.cursor() as cur:
+                # Check if person has purchases
+                cur.execute("SELECT COUNT(*) FROM purchases WHERE customer_id = %s", (person_id,))
+                purchase_count = cur.fetchone()[0]
+                
+                if purchase_count > 0:
+                    return render_template("feedback.html", title="Delete Person", 
+                                         message=f"Cannot delete person: {purchase_count} purchase(s) are linked to this person. Please delete purchases first.")
+                
+                # Check if person is an organizer
+                cur.execute("SELECT COUNT(*) FROM event_organizers WHERE person_id = %s", (person_id,))
+                organizer_count = cur.fetchone()[0]
+                
+                if organizer_count > 0:
+                    return render_template("feedback.html", title="Delete Person", 
+                                         message=f"Cannot delete person: {organizer_count} event(s) have this person as organizer. Please reassign organizers first.")
+                
                 cur.execute("DELETE FROM persons WHERE person_id = %s", (person_id,))
                 conn.commit()
             return render_template("feedback.html", title="Delete Person", message="Person deleted successfully.")
@@ -1149,6 +1187,14 @@ def venues_delete():
         venue_id = request.form.get("venue_id")
         try:
             with get_conn() as conn, conn.cursor() as cur:
+                # Check if venue has events
+                cur.execute("SELECT COUNT(*) FROM events WHERE venue_id = %s", (venue_id,))
+                event_count = cur.fetchone()[0]
+                
+                if event_count > 0:
+                    return render_template("feedback.html", title="Delete Venue", 
+                                         message=f"Cannot delete venue: {event_count} event(s) are using this venue. Please delete or reassign events first.")
+                
                 cur.execute("DELETE FROM venues WHERE venue_id = %s", (venue_id,))
                 conn.commit()
             return render_template("feedback.html", title="Delete Venue", message="Venue deleted successfully.")
@@ -1174,9 +1220,28 @@ def events_delete():
         event_id = request.form.get("event_id")
         try:
             with get_conn() as conn, conn.cursor() as cur:
+                # First, get all tickets for this event
+                cur.execute("SELECT ticket_id FROM tickets WHERE event_id = %s", (event_id,))
+                ticket_ids = [row[0] for row in cur.fetchall()]
+                
+                if ticket_ids:
+                    # Delete purchase_items that reference these tickets
+                    cur.execute("DELETE FROM purchase_items WHERE ticket_id IN %s", (tuple(ticket_ids),))
+                    
+                    # Delete regular_tickets and vip_tickets
+                    cur.execute("DELETE FROM regular_tickets WHERE ticket_id IN %s", (tuple(ticket_ids),))
+                    cur.execute("DELETE FROM vip_tickets WHERE ticket_id IN %s", (tuple(ticket_ids),))
+                    
+                    # Delete the tickets themselves
+                    cur.execute("DELETE FROM tickets WHERE event_id = %s", (event_id,))
+                
+                # Delete concert_events if exists
+                cur.execute("DELETE FROM concert_events WHERE event_id = %s", (event_id,))
+                
+                # Finally delete the event
                 cur.execute("DELETE FROM events WHERE event_id = %s", (event_id,))
                 conn.commit()
-            return render_template("feedback.html", title="Delete Event", message="Event deleted successfully.")
+            return render_template("feedback.html", title="Delete Event", message="Event and all related data deleted successfully.")
         except Exception as e:
             return render_template("feedback.html", title="Delete Event", message=f"Error: {e}")
     
@@ -1199,6 +1264,19 @@ def tickets_delete():
         ticket_id = request.form.get("ticket_id")
         try:
             with get_conn() as conn, conn.cursor() as cur:
+                # Check if ticket is in purchase_items
+                cur.execute("SELECT COUNT(*) FROM purchase_items WHERE ticket_id = %s", (ticket_id,))
+                purchase_count = cur.fetchone()[0]
+                
+                if purchase_count > 0:
+                    return render_template("feedback.html", title="Delete Ticket", 
+                                         message="Cannot delete ticket: This ticket is part of a purchase. Please delete the purchase first.")
+                
+                # Delete from regular_tickets and vip_tickets first
+                cur.execute("DELETE FROM regular_tickets WHERE ticket_id = %s", (ticket_id,))
+                cur.execute("DELETE FROM vip_tickets WHERE ticket_id = %s", (ticket_id,))
+                
+                # Delete the ticket
                 cur.execute("DELETE FROM tickets WHERE ticket_id = %s", (ticket_id,))
                 conn.commit()
             return render_template("feedback.html", title="Delete Ticket", message="Ticket deleted successfully.")
@@ -1227,9 +1305,16 @@ def purchases_delete():
         purchase_id = request.form.get("purchase_id")
         try:
             with get_conn() as conn, conn.cursor() as cur:
+                # Delete purchase_items first (CASCADE should handle this, but being explicit)
+                cur.execute("DELETE FROM purchase_items WHERE purchase_id = %s", (purchase_id,))
+                
+                # Delete payments for this purchase
+                cur.execute("DELETE FROM payments WHERE purchase_id = %s", (purchase_id,))
+                
+                # Delete the purchase
                 cur.execute("DELETE FROM purchases WHERE purchase_id = %s", (purchase_id,))
                 conn.commit()
-            return render_template("feedback.html", title="Delete Purchase", message="Purchase deleted successfully.")
+            return render_template("feedback.html", title="Delete Purchase", message="Purchase and all related data deleted successfully.")
         except Exception as e:
             return render_template("feedback.html", title="Delete Purchase", message=f"Error: {e}")
     
@@ -1537,4 +1622,4 @@ def purchases_edit():
                              item_name="purchase_id", edit_url="purchases_edit")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
