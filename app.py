@@ -8,6 +8,7 @@ from db_connection import get_db_connection as get_conn
 from functools import wraps
 import secrets
 from datetime import datetime, timedelta
+import requests
 
 load_dotenv()  # reads .env
 
@@ -1621,5 +1622,64 @@ def purchases_edit():
         return render_template("edit_select.html", title="Edit Purchase", items=purchases,
                              item_name="purchase_id", edit_url="purchases_edit")
 
+# ============== GEO-LOCATION ==============
+
+@app.route("/location")
+def location():
+    """Display the client's location on a map using IP geolocation"""
+    try:
+        # Get the client's IP address
+        # Check if behind a proxy (common in production)
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if client_ip:
+            # X-Forwarded-For can contain multiple IPs, take the first one
+            client_ip = client_ip.split(',')[0].strip()
+        else:
+            client_ip = request.remote_addr
+        
+        # For local development, use a default IP if localhost is detected
+        if client_ip in ['127.0.0.1', 'localhost', '::1', None]:
+            # Use a default IP for testing (example: Google's DNS in Mountain View, CA)
+            client_ip = '8.8.8.8'
+            flash(f'Using demo IP {client_ip} for localhost testing', 'info')
+        
+        # Perform geolocation lookup using ipinfo.io
+        # Note: ipinfo.io allows up to 50,000 requests/month on free tier
+        response = requests.get(f'https://ipinfo.io/{client_ip}/json', timeout=5)
+        
+        if response.status_code == 200:
+            geo_data = response.json()
+            
+            # Extract location data
+            ip_address = geo_data.get('ip', client_ip)
+            location_str = geo_data.get('loc', '0,0')  # Format: "lat,lon"
+            lat, lon = location_str.split(',')
+            city = geo_data.get('city', 'Unknown')
+            region = geo_data.get('region', 'Unknown')
+            country = geo_data.get('country', 'Unknown')
+            org = geo_data.get('org', 'Unknown')
+            
+            location_data = {
+                'ip': ip_address,
+                'latitude': float(lat),
+                'longitude': float(lon),
+                'city': city,
+                'region': region,
+                'country': country,
+                'org': org
+            }
+            
+            return render_template('location.html', location=location_data)
+        else:
+            flash('Unable to retrieve location information', 'error')
+            return render_template('location.html', location=None, error='API error')
+            
+    except requests.exceptions.RequestException as e:
+        flash(f'Error connecting to geolocation service: {str(e)}', 'error')
+        return render_template('location.html', location=None, error=str(e))
+    except Exception as e:
+        flash(f'Error retrieving location: {str(e)}', 'error')
+        return render_template('location.html', location=None, error=str(e))
+
 if __name__ == '__main__':
-    app.run(host='10.60.36.1', debug=True, port=8010)
+    app.run()

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Your Location - TicketMeister{% endblock %}
+
+{% block content %}
+<div class="location-container" style="padding: 100px 20px 40px 20px; max-width: 1400px; margin: 0 auto; background-color: #141414; min-height: 100vh;">
+    <h1 style="text-align: center; margin-bottom: 40px; color: #fff; font-size: 42px; font-weight: 700;">Your Location</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}" style="padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: {% if category == 'error' %}#f8d7da{% elif category == 'info' %}#d1ecf1{% else %}#d4edda{% endif %}; border: 1px solid {% if category == 'error' %}#f5c6cb{% elif category == 'info' %}#bee5eb{% else %}#c3e6cb{% endif %};">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% if location %}
+        <div class="location-info" style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+            <h2 style="margin-top: 0; color: #fff;">Location Details</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div>
+                    <strong>IP Address:</strong> {{ location.ip }}
+                </div>
+                <div>
+                    <strong>City:</strong> {{ location.city }}
+                </div>
+                <div>
+                    <strong>Region:</strong> {{ location.region }}
+                </div>
+                <div>
+                    <strong>Country:</strong> {{ location.country }}
+                </div>
+                <div>
+                    <strong>Coordinates:</strong> {{ "%.6f"|format(location.latitude) }}, {{ "%.6f"|format(location.longitude) }}
+                </div>
+                <div>
+                    <strong>ISP/Organization:</strong> {{ location.org }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Container -->
+        <div id="map" style="height: 500px; width: 100%; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"></div>
+        
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+              crossorigin=""/>
+        
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                crossorigin=""></script>
+        
+        <script>
+            // Initialize the map
+            var map = L.map('map').setView([{{ location.latitude }}, {{ location.longitude }}], 13);
+            
+            // Add OpenStreetMap tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add a marker at the location
+            var marker = L.marker([{{ location.latitude }}, {{ location.longitude }}]).addTo(map);
+            
+            // Add a popup to the marker with IP information
+            marker.bindPopup(`
+                <div style="text-align: center;">
+                    <strong>Your Location</strong><br>
+                    <strong>IP:</strong> {{ location.ip }}<br>
+                    <strong>City:</strong> {{ location.city }}<br>
+                    <strong>Region:</strong> {{ location.region }}, {{ location.country }}<br>
+                    <strong>Coordinates:</strong><br>
+                    {{ "%.6f"|format(location.latitude) }}, {{ "%.6f"|format(location.longitude) }}
+                </div>
+            `).openPopup();
+            
+            // Add a circle to show approximate area
+            var circle = L.circle([{{ location.latitude }}, {{ location.longitude }}], {
+                color: '#3388ff',
+                fillColor: '#3388ff',
+                fillOpacity: 0.2,
+                radius: 500  // 500 meters radius
+            }).addTo(map);
+        </script>
+        
+    {% else %}
+        <div class="error-message" style="text-align: center; padding: 40px; background: rgba(229, 9, 20, 0.1); border-radius: 12px; color: #fff; border: 2px solid rgba(229, 9, 20, 0.3);">
+            <h2 style="color: #e50914; margin-bottom: 15px;">Unable to Retrieve Location</h2>
+            <p style="color: rgba(255, 255, 255, 0.8);">We couldn't determine your location at this time. Please try again later.</p>
+            {% if error %}
+                <p style="font-size: 0.9em; margin-top: 15px; color: rgba(255, 255, 255, 0.6);"><strong>Error details:</strong> {{ error }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('home') }}" style="display: inline-block; padding: 14px 32px; background: #e50914; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+            Back to Home
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Additional styles for the location page */
+    .location-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #141414;
+        min-height: 100vh;
+        padding-top: 80px !important;
+    }
+    
+    .location-container h1 {
+        color: #fff;
+    }
+    
+    .location-info {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .location-info h2 {
+        color: #fff !important;
+        margin-bottom: 20px;
+    }
+    
+    .location-info > div > div {
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #e50914;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .location-info > div > div:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .location-info strong {
+        color: #e50914;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Map Container - Make it larger and vertical */
+    #map {
+        height: 600px !important;
+        width: 100% !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .leaflet-popup-content {
+        margin: 15px;
+        line-height: 1.6;
+        color: #333;
+    }
+    
+    .flash-message {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Back button styling */
+    .location-container > div:last-child a {
+        background: #e50914 !important;
+        transition: all 0.3s ease;
+    }
+    
+    .location-container > div:last-child a:hover {
+        background: #b20710 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+    }
+</style>
+{% endblock %}
